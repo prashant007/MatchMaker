@@ -3,35 +3,33 @@
 
 module NRMPExample where
 
-import DataType
+import DataType hiding (Rank)
 import Info 
 
-data Candidate = Arthur | Sunny | Joseph | Latha | Darrius deriving (Eq,Show,Ord) 
-data Hospital = City | Mercy | General deriving (Eq,Show,Ord) 
+data Candidate = Arthur | Sunny | Joseph | Latha | Darrius deriving (Eq,Show,Ord,Enum,Bounded) 
+data Hospital = City | Mercy | General deriving (Eq,Show,Ord,Enum,Bounded)
 
-instance MatchSet Candidate where
-    members = [Arthur,Sunny,Joseph,Latha,Darrius]
+instance MatchSet Candidate 
 
 instance MatchSet Hospital where
-    members = [City,Mercy,General]
     capacity _ = 2 
 
 
-data NRank = NRank Int 
+data Rank = Rank Int 
   
-rank = Just . NRank
+rank = Just . Rank
 
 
 -- =============================================================================================
-instance Relate Hospital Candidate NRank where
+instance Relate Hospital Candidate Rank where
     assignVal = info [Mercy --> mercyChoice, City --> cityChoice, General --> generalChoice] 
 
+mercyChoice, cityChoice, generalChoice :: [(Candidate,Maybe Rank)]
 mercyChoice = [Joseph --> rank 2, Darrius --> rank 1]
 cityChoice  = [Arthur --> rank 2, Sunny --> rank 3, Joseph --> rank 5, Latha  --> rank 4, Darrius --> rank 1]
 generalChoice = [Arthur  --> rank 2, Joseph --> rank 4, Latha --> rank 4, Darrius --> rank 1]
 
-
-instance Relate Candidate Hospital NRank where
+instance Relate Candidate Hospital Rank where
     assignVal = info [Arthur --> arthurChoice, Sunny  --> sunnyChoice, Joseph --> josephChoice,
                       Latha  --> lathaChoice, Darrius --> darriusChoice]
 
@@ -44,12 +42,12 @@ darriusChoice= [City --> rank 1,Mercy --> rank 2,General --> rank 3]
 -- =============================================================================================
 -- =============================================================================================
 
-instance Evaluable NRank where
-    norm (NRank r) = (1/fromIntegral r)
+instance Normalizable Rank where
+    norm (Rank r) = (1/fromIntegral r)
 
  
-instance StableMarriage Candidate Hospital NRank NRank 
-instance StableMarriage Hospital Candidate NRank NRank 
+instance StableMatch Candidate Hospital Rank Rank 
+instance StableMatch Hospital Candidate Rank Rank 
 
 
 

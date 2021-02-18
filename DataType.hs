@@ -12,74 +12,60 @@ data Level =  VLow | Low | Med | High | VHigh deriving (Eq,Ord,Show)
 type Rating = Int -- 1 to 10 with 10 being highest
 -- =============================================================================================
 
-class MatchSet a where
+class  (Bounded a,Enum a,Ord a) => MatchSet a where
     members :: [a]
+    members = enumFromTo minBound maxBound
 
     capacity :: a -> Int  
     capacity _ = 1 
 
-type Rank a b =  [(a,[b],TCapacity)] 
+type Val a b =  [(a,[b],Capacity)] 
 
-
-infoToRank :: (MatchSet a,MatchSet b,Evaluable c) => Info a b c -> Rank a b 
-infoToRank i = undefined 
-
-
--- sortInfo ::(MatchSet a,Ord b,Evaluable c) => Info a b c -> Rank a b 
--- sortInfo = map (\(x,y) -> (x,sortOnSnd y,capacity x)) . fromInfo . evalInfo 
---     where
---         evalInfo = mapInfo2 norm . filterInfo (\_ -> True) 
-
-
--- sortOnSnd :: [(a,Maybe Double)] -> [a]
--- sortOnSnd = map fst . reverse . sortBy (compare `on` (fromJust.snd))
-
-              
-class (MatchSet a,MatchSet b,Evaluable c,Ord b) => Relate a b c | a b -> c where
+valuation :: (MatchSet a,MatchSet b,Normalizable c,Ord b) => Info a b c -> Val a b 
+valuation = map (\(x,y) -> (x,sortOnSnd y,capacity x)) . fromInfo . evalInfo 
+    where 
+      evalInfo  = mapInfo2 norm . filterInfo (\_ -> True) 
+      sortOnSnd = map fst . reverse . sortBy (compare `on` (fromJust.snd))
+            
+class Relate a b c | a b -> c where
     assignVal :: Info a b c 
 
-    getRanks :: Rank a b 
-    getRanks = map (\(x,y) -> (x,sortOnSnd y,capacity x)) . fromInfo . evalInfo $ assignVal 
-        where 
-          evalInfo  = mapInfo2 norm . filterInfo (\_ -> True) 
-          sortOnSnd = map fst . reverse . sortBy (compare `on` (fromJust.snd))
 
-class Evaluable a where
+evalM :: Normalizable a => Maybe a -> Maybe Double 
+evalM Nothing = Nothing 
+evalM (Just x) = Just $ norm x 
+
+class Normalizable a where
     norm :: a -> Double
 
-    evalM :: Maybe a -> Maybe Double 
-    evalM Nothing = Nothing 
-    evalM (Just x) = Just $ norm x 
-
-
-instance Evaluable Bool where
+instance Normalizable Bool where
     norm = \case {False -> 0.0 ; True -> 1.0 } 
 
-instance Evaluable (Double,Double) where
+instance Normalizable (Double,Double) where
     norm (v,lv) = v/lv  
 
-instance Evaluable (Int,Int) where
+instance Normalizable (Int,Int) where
     norm (v,lv) = (fromIntegral v)/(fromIntegral lv)  
 
-instance Evaluable (Double,Int) where
+instance Normalizable (Double,Int) where
     norm (v,lv) = v/(fromIntegral lv)  
 
-instance Evaluable (Int,Double) where
+instance Normalizable (Int,Double) where
     norm (v,lv) = (fromIntegral v)/ lv
-
 
 -- =================================================================================================
 -- =================================================================================================
 
 type Match a b = [(a,[b],Int)]
-type RankP a b =  (Rank a b,Rank b a)
+--type RankP a b =  (Rank a b,Rank b a)
 
-class  (Relate a b c,Relate b a d,Eq b,Eq a) => StableMarriage a b c d | a b -> c d where
+class  (Relate a b c,Relate b a d,MatchSet a, MatchSet b,Normalizable c, Normalizable d, Eq b,Eq a) => 
+       StableMatch a b c d | a b -> c d where
     solveP :: Match a b
     solveP = map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
         where
           ls = galeShapley (f x) (f y) (f x)
-          (x,y) = (getRanks,getRanks)
+          (x,y) = (valuation assignVal,valuation assignVal)
           f = map (\(a,b,c) -> (a,(b,[],c,c))) 
 
 
@@ -99,7 +85,7 @@ evalB = \case {False -> 0.0 ; True -> 1.0 }
 evalR :: Rating -> Double
 evalR = \v -> (fromIntegral v)/10.0
 
-expressCh :: (MatchSet b,Evaluable c,Eq b) => [b] -> [Maybe c] -> (b -> Maybe c) 
+expressCh :: (MatchSet b,Normalizable c,Eq b) => [b] -> [Maybe c] -> (b -> Maybe c) 
 expressCh bs cs b = cs !! i
     where i = (fromJust.elemIndex b) bs  
 

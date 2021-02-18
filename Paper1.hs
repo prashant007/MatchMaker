@@ -1,23 +1,11 @@
-{-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies, InstanceSigs, UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies, InstanceSigs, UndecidableInstances, DeriveAnyClass #-}
 {-# LANGUAGE TypeSynonymInstances, LambdaCase, DefaultSignatures,TypeSynonymInstances, FlexibleContexts, FlexibleInstances #-}
 
 import DataType
 import Info 
 
-data Candidate = Prashant | Divya | Daniel deriving (Eq,Show,Ord) 
-data Paper = Paper2 | Paper3 | Paper20 deriving (Eq,Show,Ord) 
-
-
-class (Bounded a,Enum a,Ord a) => Set a where
-  members :: [a]
-  members = enumFromTo minBound maxBound
-
-instance MatchSet Candidate where
-    members = [Prashant,Divya,Daniel]
-
-instance MatchSet Paper where
-    members = [Paper2,Paper3,Paper20]
-
+data Candidate = Prashant | Divya | Daniel deriving (Eq,Show,Ord,Enum,Bounded,MatchSet) 
+data Paper = Paper2 | Paper3 | Paper20 deriving (Eq,Show,Ord,Enum,Bounded,MatchSet) 
 
 instance Relate Candidate Paper RankC where
     assignVal = info [Prashant --> prashantChoice, Divya  --> divyaChoice, Daniel --> danielChoice] 
@@ -37,7 +25,6 @@ p20Choice = [Prashant --> rank 2, Divya --> rank 3, Daniel --> rank 1]
 data RankC = RankC Int 
   
 rank = Just . RankC
-
 
 instance Evaluable RankC where
     norm (RankC r) = (1/fromIntegral r)

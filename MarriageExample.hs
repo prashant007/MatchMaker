@@ -2,7 +2,7 @@
 
 module MarraigeExample where
 
-import DataType
+import DataType 
 import Data.List 
 import Data.Maybe
 

@@ -3,18 +3,18 @@ import Data.Maybe
 import Data.List 
   
 
-type TCapacity = Int 
+type Capacity = Int 
 type RCapacity = Int 
 type Options b = [b] 
 type Matches b = [b]
-type MRank a b = [(a,(Options b,Matches b,TCapacity,RCapacity))]
+type MRank a b = [(a,(Options b,Matches b,Capacity,RCapacity))]
 
 type RankPair a b = (MRank a b,MRank b a)
 
 del xv  = filter (\a -> fst a /= xv) 
 delL xs = filter (\a -> not $ elem (fst a) xs) 
 
-cond :: Eq b => (a,(Options b,Matches b,TCapacity,RCapacity)) -> Bool 
+cond :: Eq b => (a,(Options b,Matches b,Capacity,RCapacity)) -> Bool 
 cond = (\(_,(x,y,c,r)) -> x == [] || r == 0)
 
 -- while there exist a free man m who still has a woman w to propose to 
@@ -32,7 +32,7 @@ galeShapley (x:xs) ys xs' =
       False -> let (nys,nxs') = g x (ys,xs') in galeShapley xs nys nxs'
 
 
-g :: (Eq b, Eq a) => (a,(Options b, Matches b,TCapacity,RCapacity)) -> (MRank b a,MRank a b) ->  (MRank b a,MRank a b)
+g :: (Eq b, Eq a) => (a,(Options b, Matches b,Capacity,RCapacity)) -> (MRank b a,MRank a b) ->  (MRank b a,MRank a b)
 g (xv,(xo,xm,xc,xr)) (yl,xl) 
     | xr == 0 || xo == [] = (yl,(xv,(xo,xm,xc,xr)):del xv xl)
     | otherwise = let yv = head xo 
