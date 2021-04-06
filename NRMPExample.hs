@@ -7,7 +7,7 @@ import DataType
 data Candidate = Arthur | Sunny | Joseph | Latha | Darrius deriving (Eq,Show) 
 data Hospital = City | Mercy | General deriving (Eq,Show) 
 
-instance MatchSet Candidate where
+instance Set Candidate where
     members = [Arthur,Sunny,Joseph,Latha,Darrius]
 
 instance MatchSet Hospital where

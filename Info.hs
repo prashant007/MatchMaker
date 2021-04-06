@@ -1,8 +1,12 @@
 module Info where
 
 import qualified Data.Map as M 
+import Data.Maybe 
 
-data Rec a b = Rec {unRec :: M.Map a (Maybe b)}
+data Rec a b = Rec {unRec :: M.Map a (Maybe b)} deriving Show 
+
+lookupRec :: Ord a => a -> Rec a b -> Maybe b 
+lookupRec x  = fromJust . M.lookup x . unRec 
 
 toRec :: Ord a => [(a,Maybe b)] -> Rec a b  
 toRec = Rec . M.fromList 
@@ -19,13 +23,14 @@ mapRec f = onRec (M.map (fmap f))
 filterRec :: (Maybe b -> Bool) -> Rec a b -> Rec a b 
 filterRec f = onRec (M.filter f)  
 
+data Info a b c = Info {unInfo :: M.Map a (Rec b c)} deriving Show 
 
-data Info a b c = Info {unInfo :: M.Map a (Rec b c)}
+lookupInfo :: (Ord a,Ord b) => (a,b) -> Info a b c -> Maybe c 
+lookupInfo (x,y) = lookupRec y. fromJust . M.lookup x . unInfo
+
 
 fromInfo :: Ord b => Info a b c -> [(a,[(b,Maybe c)])] 
 fromInfo = M.toList . M.map fromRec . unInfo
-
-
 
 (-->) :: a -> b -> (a,b)
 (-->) x y = (x,y)
@@ -36,8 +41,8 @@ info = Info . M.fromList . map (\(x,y) -> (x,toRec y))
 onInfo :: (M.Map a (Rec b c) -> M.Map d (Rec e f)) -> Info a b c -> Info d e f 
 onInfo f = Info .  f . unInfo 
 
-mapInfo2 :: (c -> d) -> Info a b c -> Info a b d 
-mapInfo2 f = onInfo (M.map (mapRec f))
+mapInfo :: (c -> d) -> Info a b c -> Info a b d 
+mapInfo f = onInfo (M.map (mapRec f))
 
 filterInfo :: (c -> Bool) -> Info a b c -> Info a b c 
 filterInfo f = onInfo (M.map (filterRec (convFun f)))

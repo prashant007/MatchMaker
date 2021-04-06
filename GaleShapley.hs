@@ -20,16 +20,19 @@ cond = (\(_,(x,y,c,r)) -> x == [] || r == 0)
 -- while there exist a free man m who still has a woman w to propose to 
 
 
-galeShapley :: (Eq b, Eq a) => MRank a b -> MRank b a -> MRank a b -> MRank a b 
-galeShapley [] ys xs' =  
-    let f = and.map cond 
-    in case f xs' of 
-         {True  -> xs'; False -> galeShapley xs' ys xs'}
+galeShapley :: (Eq b, Eq a) => MRank a b -> MRank b a -> MRank a b 
+galeShapley x y = gsHelper x y x 
+    where 
+        gsHelper :: (Eq b, Eq a) => MRank a b -> MRank b a -> MRank a b -> MRank a b 
+        gsHelper [] ys xs' =  
+            let f = and.map cond 
+            in case f xs' of 
+                 {True  -> xs'; False -> gsHelper xs' ys xs'}
 
-galeShapley (x:xs) ys xs' =  
-    case cond x of 
-      True  -> galeShapley xs ys xs'
-      False -> let (nys,nxs') = g x (ys,xs') in galeShapley xs nys nxs'
+        gsHelper (x:xs) ys xs' =  
+            case cond x of 
+              True  -> gsHelper xs ys xs'
+              False -> let (nys,nxs') = g x (ys,xs') in gsHelper xs nys nxs'
 
 
 g :: (Eq b, Eq a) => (a,(Options b, Matches b,Capacity,RCapacity)) -> (MRank b a,MRank a b) ->  (MRank b a,MRank a b)
