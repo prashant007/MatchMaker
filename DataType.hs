@@ -44,6 +44,17 @@ rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInf
 class Relate a b c | a b -> c where
     gather :: Info a b c 
 
+
+class Ord a => Fixed a b where
+    profile :: Rec a b 
+    profile = toRec []
+
+-- class (Ord a,Ord b,Fixed b c) => Relate a b c d | a b -> c d where
+
+--     gather :: Info a b d 
+--     gather = info []
+
+
 class Norm a where
     components :: a -> [Double]
     components _ = []
@@ -74,7 +85,7 @@ instance Norm (Int,Double) where
 
 type SetNorm a b c d = (Set a,Set b,Norm c, Norm d)
 type Set2 a b = (Set a,Set b)
-type Rel2 a b c d = (Relate a b c,Relate b a d)
+-- type Rel2 a b c d = (Relate a b c,Relate b a d)
 
 rankOrder1 :: (Set a,Ord b) => Info a b Rank -> Match a b 
 rankOrder1 = Match . map (\(x,y) -> (x,sortRank y,capacity x)) . fromInfo . mapInfo unRank 
@@ -82,14 +93,19 @@ rankOrder1 = Match . map (\(x,y) -> (x,sortRank y,capacity x)) . fromInfo . mapI
         sortRank :: Ord c => [(b,Maybe c)] -> [b]
         sortRank = map fst . sortBy (compare `on` (fromJust.snd))
 
-class (Relate a b Rank,Relate b a Rank, Set2 a b) => TwowayMatch1 a b where
-    stableMatch1 :: Match a b 
-    stableMatch1 = Match $ map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
+class (Relate a b Rank,Relate b a Rank, Set2 a b) => TwowayMatchWithRank a b where
+    stableMatchWithRank :: Match a b 
+    stableMatchWithRank = Match $ map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
         where
           ls = galeShapley (f x) (f y) 
           (x,y) = (rankOrder1 gather,rankOrder1 gather)
           f = map (\(a,b,c) -> (a,(b,[],c,c))) . unMatch   
   
+
+choices :: (Ord a,Ord b) => [(a,[b])] -> Info a b Rank
+choices = info . map (\(x,ys) -> (x,assocRanks ys))
+    where assocRanks =  toRec . zipWith (\q p -> p --> rank q) [1..] 
+
 
 class (Relate a b c,Set a, Set b, Norm c, Norm d) =>
       TwowayMatch a b c d | a b -> c d where
@@ -131,23 +147,3 @@ class Set b => Annotate a b | b -> a where
     labels :: [b]
     labels = members
 
-{-
-    dconstant :: b -> Double 
-
-
-class Denormalize a where
-    denorm :: Double -> Double -> a 
-
-instance Denormalize Bool where
-  denorm 0 _ = False 
-  denorm _ _ = True 
-
-instance Annotate HChoice HLabel where
-  dconstant = \case ExamScore   -> 800
-                    IntervPerf  -> 1
-                    PrevRelExpr -> 1 
-
-instance Denormalize Double where
-  denorm x y = x * y 
-
--}

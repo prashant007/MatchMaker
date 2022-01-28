@@ -35,8 +35,8 @@ fromInfo = M.toList . M.map fromRec . unInfo
 (-->) :: a -> b -> (a,b)
 (-->) x y = (x,y)
 
-info :: (Ord a, Ord b) => [(a,[(b,Maybe c)])] -> Info a b c 
-info = Info . M.fromList . map (\(x,y) -> (x,toRec y)) 
+info :: (Ord a, Ord b) => [(a,Rec b c)] -> Info a b c 
+info = Info . M.fromList 
 
 onInfo :: (M.Map a (Rec b c) -> M.Map d (Rec e f)) -> Info a b c -> Info d e f 
 onInfo f = Info .  f . unInfo 

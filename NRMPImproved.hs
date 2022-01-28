@@ -68,6 +68,11 @@ instance Norm AChoice where
     components (AChoice l s c r)
       = weight [0.2,0.3,0.3,0.2] [norm (l::Rating,10::Int), norm (s::Double,120000.0::Double),
                                   norm c, norm r]
+      
+      = weight [(l::Rating,10::Int) --> 0.2,
+                (s::Double,120000.0::Double) --> 0.3,
+                c --> 0.3,
+                r --> 0.2]
 
 instance Norm HChoice where
     components (HChoice m i p) = weight [0.4,0.3,0.3] [norm (m::Int,800::Int), norm i, norm p]
