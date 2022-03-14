@@ -5,8 +5,12 @@ import Data.Function
 import Data.List 
 import Data.Maybe 
 import GaleShapley 
+import ImplementStableRoommate
 import Info 
 import qualified Data.Map as M 
+import MatchDatatype
+import SerialDictatorship
+
 
 data Level =  VLow | Low | Med | High | VHigh deriving (Eq,Ord,Show)
 type Rating = Int -- 1 to 10 with 10 being highest
@@ -15,28 +19,33 @@ data Rank = Rank {unRank :: Int}
 rank = Just . Rank
 -- =============================================================================================
 
+(-->) :: a -> b -> (a,b)
+(-->) x y = (x,y)
+
+every :: Capacity -> a -> Capacity
+every c _ = c 
+
 class  (Bounded a,Enum a,Ord a) => Set a where
     members :: [a]
     members = enumFromTo minBound maxBound
 
     capacity :: a -> Capacity  
-    capacity _ = 1 
+    capacity = every 1
 
-data Match a b = Match {unMatch:: [(a,[b],Capacity)]} 
 
-instance (Show a,Show b) => Show (Match a b) where
-    show = concatMap f . unMatch  
-        where 
-            f (x,y,z) = show x ++ ": \n\t\t Matched with " ++ show y
-                        ++ "\n\t\t Remaining capacity: " ++ show z ++ "\n"
+-- instance (Show a,Show b) => Show (Match a b) where
+--     show = concatMap f . unMatch  
+--         where 
+--             f (x,y,z) = show x ++ ": \n\t\t Matched with " ++ show y
+--                         ++ "\n\t\t Remaining capacity: " ++ show z ++ "\n"
      
 sortSnd :: Ord c => [(b,Maybe c)] -> [b]
 sortSnd = map fst . reverse . sortBy (compare `on` (fromJust.snd))
 
 type Val o a = Info o a [Double]
 
-decomposed ::  (Ord a,Norm b) => Info o a b -> Val o a 
-decomposed = mapInfo components 
+{-decomposed ::  (Ord a,Norm b) => Info o a b -> Val o a 
+decomposed = mapInfo components -}
 
 rankOrder :: (Set a,Set b,Norm c,Ord b) => Info a b c -> Match a b 
 rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfo norm
@@ -45,93 +54,124 @@ class Relate a b c | a b -> c where
     gather :: Info a b c 
 
 
-class Ord a => Fixed a b where
-    profile :: Rec a b 
-    profile = toRec []
+-- class Norm a where
+--     -- components :: a -> [Double]
+--     -- components _ = []
 
--- class (Ord a,Ord b,Fixed b c) => Relate a b c d | a b -> c d where
+--     norm :: a ->  Double
+--     -- norm = sum . components
 
---     gather :: Info a b d 
---     gather = info []
+-- instance Norm Rank where
+--     norm (Rank r) = (1/fromIntegral r)
+
+-- instance Norm Bool where
+--     norm = \case {False -> 0.0 ; True -> 1.0 } 
+
+-- instance Norm (Double,Double) where
+--     norm (v,lv) = min (v/lv) 1   
+
+-- instance Norm (Int,Int) where
+--     norm (v,lv) = min (fromIntegral v/fromIntegral lv) 1
+
+-- instance Norm (Double,Int) where
+--     norm (v,lv) = min (v/fromIntegral lv)  1 
+
+-- instance Norm (Int,Double) where
+    -- norm (v,lv) = min (fromIntegral v/lv) 1 
 
 
 class Norm a where
     components :: a -> [Double]
     components _ = []
 
-    norm :: a -> Double
-    norm = sum . components
+    norm :: a -> Maybe Double -> Double
+    norm x _ = sum . components $ x
 
 instance Norm Rank where
-    norm (Rank r) = (1/fromIntegral r)
+    norm (Rank r) Nothing = (1/fromIntegral r)
 
 instance Norm Bool where
-    norm = \case {False -> 0.0 ; True -> 1.0 } 
+    norm r Nothing = case x of {False -> 0.0 ; True -> 1.0} 
 
-instance Norm (Double,Double) where
-    norm (v,lv) = min (v/lv) 1   
+instance Norm Double where
+    norm v lv = min (v/lv) 1   
 
-instance Norm (Int,Int) where
-    norm (v,lv) = min (fromIntegral v/fromIntegral lv) 1
+instance Norm Int where
+    norm v lv = min (fromIntegral v/lv) 1
 
-instance Norm (Double,Int) where
-    norm (v,lv) = min (v/fromIntegral lv)  1 
 
-instance Norm (Int,Double) where
-    norm (v,lv) = min (fromIntegral v/lv) 1 
+with :: a -> b -> (a,Maybe b)
+with x y = (x,Just y)
+
+only :: a -> (a,Maybe b)
+only x = (x,Nothing)
+
+normAll :: [(a,Maybe b)] -> [Double]
+normAll = map norm 
 
 -- =================================================================================================
 -- =================================================================================================
 
 type SetNorm a b c d = (Set a,Set b,Norm c, Norm d)
 type Set2 a b = (Set a,Set b)
--- type Rel2 a b c d = (Relate a b c,Relate b a d)
-
-rankOrder1 :: (Set a,Ord b) => Info a b Rank -> Match a b 
-rankOrder1 = Match . map (\(x,y) -> (x,sortRank y,capacity x)) . fromInfo . mapInfo unRank 
-    where 
-        sortRank :: Ord c => [(b,Maybe c)] -> [b]
-        sortRank = map fst . sortBy (compare `on` (fromJust.snd))
-
-class (Relate a b Rank,Relate b a Rank, Set2 a b) => TwowayMatchWithRank a b where
-    stableMatchWithRank :: Match a b 
-    stableMatchWithRank = Match $ map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
-        where
-          ls = galeShapley (f x) (f y) 
-          (x,y) = (rankOrder1 gather,rankOrder1 gather)
-          f = map (\(a,b,c) -> (a,(b,[],c,c))) . unMatch   
-  
+type Norm2 a b = (Norm a,Norm b)
+type Relate2 a b c d = (Relate a b c,Relate b a d)
 
 choices :: (Ord a,Ord b) => [(a,[b])] -> Info a b Rank
 choices = info . map (\(x,ys) -> (x,assocRanks ys))
-    where assocRanks =  toRec . zipWith (\q p -> p --> rank q) [1..] 
+    where assocRanks =  zipWith (\q p -> p --> Rank q) [1..] 
 
 
-class (Relate a b c,Set a, Set b, Norm c, Norm d) =>
-      TwowayMatch a b c d | a b -> c d where
+twoWayWithCapacity :: (Relate2 a b c d,Set2 a b,Norm2 c d) => CMatch a b
+twoWayWithCapacity = CMatch $ map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
+    where
+      ls = galeShapley (f x) (f y) 
+      (x,y) = (rankOrder gather,rankOrder gather)
+      f = map (\(a,b,c) -> (a,(b,[],c,c))) . unMatch 
 
-      stableMatch :: Relate b a d => Match a b
-      stableMatch = Match $ map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
-          where
-            ls = galeShapley (f x) (f y) 
-            (x,y) = (rankOrder gather,rankOrder gather)
-            f = map (\(a,b,c) -> (a,(b,[],c,c))) . unMatch 
+twoWay :: (Relate2 a b c d,Set2 a b,Norm2 c d) => Match a b
+twoWay = rmvCapacity twoWayWithCapacity
 
-      stableMatchOneWay :: Match a b 
-      stableMatchOneWay = undefined    
+rmvCapacity :: CMatch a b -> Match a b 
+rmvCapacity (CMatch ls) = Match $ map (\(p,r,c) -> (p,r,0)) ls
 
-type RommateMatch a = Match a a 
 
-class StableRoommate a b | a -> b where
-    stableRoommate :: RommateMatch a 
-    stableRoommate = undefined   
+twoWayExpl :: (Relate2 a b c d,Set2 a b,Norm2 c d) => a -> b -> Match a b
+twoWayExpl a b = Match $ map (\(p,(_,r,_,t)) -> if p == a then (p,b:r,t) else (p,r,t)) ls
+    where 
+        ls = galeShapley (f x') (f y') 
+        (x,y) = (rankOrder gather,rankOrder gather)
+        x1 = reducecapacity a 1 x 
+        y1 = reducecapacity b 1 y
+        x' = changepreferences (delete b) a x1 
+        y' = changepreferences (delete a) b y1
+        f = map (\(a,b,c) -> (a,(b,[],c,c))) . unMatch 
 
-class Relate a b c => OnewayMatch a b c | a b -> c where
-    rankMaximal :: Match a b 
+sameSet :: (Relate a a b,Set a,Norm b) => SameSetMatch a
+sameSet = irvings $ rankOrder gather
+
+oneWayWithCapacity :: (Relate a b c, Set2 a b,Norm c) => CMatch a b 
+oneWayWithCapacity = CMatch $ unMatch $ serialAssignment members [] $ rankOrder gather
+
+oneWay :: (Relate2 a b c d,Set2 a b,Norm2 c d) => Match a b
+oneWay = rmvCapacity oneWayWithCapacity 
+
+-- sameSetExpl :: (Relate a a b,Set a,Norm b) => a -> a -> SameSetMatch a 
+-- sameSetExpl x y = case m2 of 
+--                       Nothing -> Nothing 
+--                       Just ms -> let Match ms' =  ms 
+--                                  in Just $ Match $ (y,[x],0):(x,[y],0):ms'  
+--     where m  = rankOrder gather
+--           m1 = delPreference m 
+--           m2 = irvings m1 
 
 -- =================================================================================================
-weight :: [Double] -> [Double] -> [Double] 
-weight ws = zipWith (*) ws 
+-- weight' :: [Double] -> [Double] -> [Double] 
+-- weight' ws = zipWith (*) ws 
+
+weight :: [(Double,Double)] ->  Double
+weight xs = sum . zipWith (*) (map fst xs) $ (map snd xs)
+
 
 evalL = \case {VLow -> 0.2; Low -> 0.4 ; Med -> 0.6 ; High -> 0.8 ; VHigh -> 1.0 } 
 evalB = \case {False -> 0.0 ; True -> 1.0 } 
@@ -147,3 +187,12 @@ class Set b => Annotate a b | b -> a where
     labels :: [b]
     labels = members
 
+-- ================================================================================================
+
+class Schedule a b | a -> b where
+    constraints :: Constraints a
+    availability :: Info a b Rank  
+
+data Quantifier  = All | Oneof | LeastOne
+
+type Constraints a = [(Quantifier, [a])]

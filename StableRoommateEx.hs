@@ -1,37 +1,38 @@
-{-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies, InstanceSigs, UndecidableInstances #-}
-{-# LANGUAGE TypeSynonymInstances, DeriveAnyClass, LambdaCase, DefaultSignatures,TypeSynonymInstances, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses,DeriveAnyClass #-}
 
 import DataType 
 import Info 
+import MatchDatatype
 
--- instance Set Student 
 
-data Student = Bob | Joe | Zack | Dave | Will | Tony deriving (Eq,Show,Ord,Enum,Bounded,Set) 
+-- https://www.youtube.com/watch?v=9Lo7TFAkohE&ab_channel=OscarRobertson
+
+data Student = Charlie | Peter | Elise | Paul | Kelly | Sam deriving (Eq,Show,Ord,Enum,Bounded,Set) 
 
 instance Relate Student Student Rank where
-    gather = info [Bob --> bobsChoice,  Joe --> joesChoice, 
-                   Zack --> zacksChoice,Dave --> davesChoice,
-                   Will --> willsChoice, Tony --> tonysChoice] 
+    gather = choices [Charlie--> [Peter,Paul,Sam,Kelly,Elise], 
+                      Peter  --> [Kelly,Elise,Sam,Paul,Charlie], 
+                      Elise  --> [Peter,Sam,Kelly,Charlie,Paul],
+                      Paul   --> [Elise,Charlie,Sam,Peter,Kelly] ,
+                      Kelly  --> [Peter,Charlie,Sam,Elise,Paul],
+                      Sam    --> [Charlie,Paul,Kelly,Elise,Peter]] 
 
-bobsChoice, joesChoice, zacksChoice, davesChoice, willsChoice, tonysChoice :: [(Student,Maybe Rank)]
-bobsChoice  = [Zack --> rank 1,Dave --> rank 2,Joe --> rank 3,
-               Tony --> rank 4,Will --> rank 5]
-
-joesChoice  = [Tony --> rank 1,Will --> rank 2,Dave --> rank 3,
-               Bob --> rank 4, Zack --> rank 5]
-
-zacksChoice = [Joe  --> rank 1,Dave --> rank 2,Will --> rank 3,
-               Bob --> rank 4,Tony --> rank 5]
-
-davesChoice = [Will --> rank 1, Joe --> rank 2,Zack --> rank 3,
-               Tony --> rank 4, Bob --> rank 5]
-
-willsChoice = [Zack --> rank 1,Bob --> rank 2,Joe --> rank 3,
-               Dave --> rank 4, Tony --> rank 5]
-
-tonysChoice = [Will --> rank 1,Bob --> rank 2,Zack --> rank 3,
-               Dave --> rank 4, Joe --> rank 5]
-
-instance TwowayMatch1 Student Student 
-instance TwowayMatch Student Student Rank Rank  
-
+-- *Main> sameSetMatch :: SameSetMatch Student
+-- Just Charlie:
+--                  Matched with [Sam]
+--                  Remaining capacity: 1
+-- Peter:
+--                  Matched with [Kelly]
+--                  Remaining capacity: 1
+-- Elise:
+--                  Matched with [Paul]
+--                  Remaining capacity: 1
+-- Paul:
+--                  Matched with [Elise]
+--                  Remaining capacity: 1
+-- Kelly:
+--                  Matched with [Peter]
+--                  Remaining capacity: 1
+-- Sam:
+--                  Matched with [Charlie]
+--                  Remaining capacity: 1

@@ -5,13 +5,25 @@ import Data.Maybe
 import Data.List 
 
 type Capacity = Int 
+
 data Match a b = Match {unMatch:: [(a,[b],Capacity)]} 
+type SameSetMatch a = Maybe (Match a a) 
+
+data CMatch a b =  CMatch {unCMatch::  [(a,[b],Capacity)]} 
 
 instance (Show a,Show b) => Show (Match a b) where
-    show = concatMap f . unMatch  
+    show = parens. concat. intersperse ", ". map f . unMatch  
         where 
-            f (x,y,z) = show x ++ ": \n\t\t Matched with " ++ show y
-                        ++ "\n\t\t Remaining capacity: " ++ show z ++ "\n"
+            parens = \x -> "{" ++ x ++ "}"
+            f (x,y,z) = show x ++ " --> " ++ show y 
+
+
+instance (Show a,Show b) => Show (CMatch a b) where
+    show = parens. concat. intersperse ", ". map f . unCMatch  
+        where 
+            parens = \x -> "{" ++ x ++ "}"
+            f (x,y,z) = show x ++ " --> " ++ show y ++ " : " ++ show z 
+            
 
 type StabMatch a = Match a a 
 
@@ -32,12 +44,6 @@ onMatch f = Match . f . unMatch
 foldMatch :: ((a,[b],Capacity) -> c -> c) -> c -> Match a b -> c 
 foldMatch f acc = foldr f acc . unMatch
 
--- modMatch :: (Eq a,Eq b) => (a -> [b] -> [b]) -> (a -> Capacity -> Capacity) ->
---             a -> Match a b -> Match a b 
--- modMatch f g x m = onMatch h m 
---                  where (xchs,xcap) = lookupMatch x m    
---                        h y = (x,f x xchs,g x xcap):(y \\ [(x,xchs,xcap)])
-
 modMatch :: (Eq a,Eq b) => ((a,[b],Capacity) -> (a,[b],Capacity)) -> Match a b -> Match a b 
 modMatch f = Match . map f . unMatch 
 
@@ -55,6 +61,9 @@ reducecapacity a c = modMatch (\xc@(x,y,z) -> if x == a then (x,y,z-c) else xc)
 
 changepreferences :: (Eq a,Eq b) => ([b] -> [b]) -> a -> Match a b -> Match a b 
 changepreferences f a = modMatch (\xc@(x,y,z) -> if x == a then (x,f y,z) else xc)
+
+delpreference :: (Eq a,Eq b) =>  b -> Match a b -> Match a b
+delpreference b = modMatch (\xc@(x,y,z) -> (x,delete b y,z))
 
 iterChangeperefrences :: (Eq a,Eq b) => ([b] -> [b]) -> [a] -> Match a b -> Match a b 
 iterChangeperefrences _ [] m = m 

@@ -35,7 +35,6 @@ instance Set Hospital where
     capacity _ = 2 
 
 
-
 -- These attributes have fixed values irrespective of the hospital they are applying to
 data AInfo   =  Appl {examScore :: Double, experience :: Double,
                       interview :: Double}

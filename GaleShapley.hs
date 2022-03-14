@@ -1,9 +1,9 @@
 module GaleShapley where
+
 import Data.Maybe 
 import Data.List 
+import MatchDatatype
   
-
-type Capacity = Int 
 type RCapacity = Int 
 type Options b = [b] 
 type Matches b = [b]

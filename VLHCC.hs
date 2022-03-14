@@ -10,11 +10,11 @@ data Paper = Paper09 | Paper18 | Paper35 | Paper48 | Paper54 | Paper70 deriving 
 
 -- Every reviewers is assigned 2 papers
 instance Set Reviewer where
-    capacity _ = 1
+    capacity = every 2
 
 -- Every paper is assigned 2 reviewers
 instance Set Paper where
-    capacity _ = 1 
+    capacity = every 1 
 
 -- =============================================================================================
 

@@ -1,3 +1,5 @@
+module ImplementStableRoommate where
+
 import MatchDatatype 
 
 import Data.Maybe 
@@ -106,17 +108,29 @@ mutualreject :: Eq a => a -> a -> PrefTable a -> PrefTable a
 mutualreject x y m = let m' = changepreferences (delete y) x m 
                      in changepreferences (delete x) y m' 
 
-reduceWithCycle :: Eq a => a -> [(a,a)] -> PrefTable a -> PrefTable a 
-reduceWithCycle x [] m = m
-reduceWithCycle x [(a,b)] m = mutualreject x b m 
-reduceWithCycle x ((a,b):(c,d):xs) m = let m' = mutualreject b c m
-                                       in reduceWithCycle x ((c,d):xs) m'
+reduceWithCycle :: Eq a => [(a,a)] -> PrefTable a -> PrefTable a 
+reduceWithCycle [] m = m
+reduceWithCycle [(a,b)] m = mutualreject a b m 
+reduceWithCycle ((a,b):xs) m = let m' = mutualreject a b m
+                                       in reduceWithCycle xs m'
 
 
-gencycle :: Eq a => a -> a -> PrefTable a -> [(a,a)]
-gencycle a x m 
-  | a == x = []
-  | otherwise = (x,sndx):(gencycle a lsnd m)
+type Flag = Int 
+
+type PList a = [a]
+type QList a = [a]
+type PQPair a = (PList a,QList a)
+
+
+trimPQList :: Eq a => a -> PQPair a -> [(a,a)]
+trimPQList x (p:ps,qs)
+  | x == p = zip ps (drop (length qs-length ps) qs)
+  | otherwise = trimPQList x (ps,qs)
+
+gencycle :: Eq a => a -> PrefTable a -> PQPair a -> [(a,a)]
+gencycle x m (p,q) 
+  | elem x p = trimPQList x (p++[x],q)
+  | otherwise = gencycle lsnd m (p++[x],q++[sndx])
   where sndx = (getpreferences x m)!!1
         lsnd = last.getpreferences sndx $ m
 
@@ -127,15 +141,16 @@ multichoiceElem = head . foldMatch f []
                                             then (x:acc) else acc   
 
 
-phase2 :: Eq a => PrefTable a -> Maybe (PrefTable a)
-phase2 m = case phase1WithReduction m of 
+irvings :: Eq a => PrefTable a -> Maybe (PrefTable a)
+irvings m = case phase1WithReduction m of 
                Nothing -> Nothing 
                Just m' -> case onechoiceLeft m' of 
                               True  -> return m'
                               False -> do 
                                   let x  = multichoiceElem m'
-                                      sx = (getpreferences x m')!!1
-                                  phase2 (reduceWithCycle x (gencycle x sx m') m')    
+                                  irvings (reduceWithCycle (gencycle x m' ([],[])) m')    
+
+
 
 
 {-
@@ -149,6 +164,27 @@ m1 = Match [ ("1",g "46253",1), ("2",g "63514",1), ("3",g "45162",1),
        g = map (\x -> x:[])
 
 
+Just m1_val = phase1WithReduction m1
+m1_ans = irvings m1_val
+
+
+video = Match [ ("A",g "BDFCE",1), ("B",g "DEFAC",1), ("C",g "DEFAB",1),
+                ("D",g "FCAEB",1), ("E",g "FCDBA",1), ("F",g "ABDCE",1)]  
+        where
+           g :: String -> [String]
+           g = map (\x -> x:[])
+
+Just vid_val = phase1WithReduction video
+vid_ans = irvings vid_val
+
+vid_expl = Match [("C",g "DEF",1),("D",g "FCE",1), ("E",g "FCD",1), ("F",g "DCE",1)]  
+        where
+           g :: String -> [String]
+           g = map (\x -> x:[])
+
+Just vid_expl_val = phase1WithReduction vid_expl
+vid_expl_ans = irvings vid_expl_val
+
 m2 = Match [ ("Charlie", words "Peter Paul Sam Kelly Elise",1), 
              ("Peter", words "Kelly Elise Sam Paul Charlie",1),
              ("Elise", words "Peter Sam Kelly Charlie Paul",1),
@@ -157,8 +193,19 @@ m2 = Match [ ("Charlie", words "Peter Paul Sam Kelly Elise",1),
              ("Sam", words "Charlie Paul Kelly Elise Peter",1)
            ]  
 
+
+Just m2_val = phase1WithReduction m2
+m2_ans = irvings m2_val
+
+
 m3 = Match [ ("1",g "26435",1), ("2",g "35164",1), ("3",g "16254",1),
              ("4",g "52361",1), ("5",g "61342",1), ("6",g "42513",1)]  
     where
        g :: String -> [String]
        g = map (\x -> x:[])
+
+Just m3_val = phase1WithReduction m3
+m3_ans = irvings m3_val
+
+-- *Main> gencycle "2" m1_val ([],[])
+-- (["2","3","4"],["5","2","5"])
