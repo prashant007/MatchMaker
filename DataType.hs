@@ -22,7 +22,7 @@ rank = Just . Rank
 (-->) :: a -> b -> (a,b)
 (-->) x y = (x,y)
 
-every :: Capacity -> a -> Capacity
+every :: b -> a -> b 
 every c _ = c 
 
 class  (Bounded a,Enum a,Ord a) => Set a where
@@ -32,72 +32,46 @@ class  (Bounded a,Enum a,Ord a) => Set a where
     capacity :: a -> Capacity  
     capacity = every 1
 
-
--- instance (Show a,Show b) => Show (Match a b) where
---     show = concatMap f . unMatch  
---         where 
---             f (x,y,z) = show x ++ ": \n\t\t Matched with " ++ show y
---                         ++ "\n\t\t Remaining capacity: " ++ show z ++ "\n"
      
 sortSnd :: Ord c => [(b,Maybe c)] -> [b]
 sortSnd = map fst . reverse . sortBy (compare `on` (fromJust.snd))
 
 type Val o a = Info o a [Double]
 
-{-decomposed ::  (Ord a,Norm b) => Info o a b -> Val o a 
-decomposed = mapInfo components -}
 
 rankOrder :: (Set a,Set b,Norm c,Ord b) => Info a b c -> Match a b 
-rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfo(\x -> norm x Nothing)
+rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfo(\x -> norm (x,Nothing))
      
 class Relate a b c | a b -> c where
     gather :: Info a b c 
 
+class Weights a where
+    weights :: a -> [Double]
+    weights _ = [1.0]
 
--- class Norm a where
---     -- components :: a -> [Double]
---     -- components _ = []
+instance Weights Int 
+instance Weights Double
+instance Weights Bool 
+instance Weights Rank 
 
---     norm :: a ->  Double
---     -- norm = sum . components
-
--- instance Norm Rank where
---     norm (Rank r) = (1/fromIntegral r)
-
--- instance Norm Bool where
---     norm = \case {False -> 0.0 ; True -> 1.0 } 
-
--- instance Norm (Double,Double) where
---     norm (v,lv) = min (v/lv) 1   
-
--- instance Norm (Int,Int) where
---     norm (v,lv) = min (fromIntegral v/fromIntegral lv) 1
-
--- instance Norm (Double,Int) where
---     norm (v,lv) = min (v/fromIntegral lv)  1 
-
--- instance Norm (Int,Double) where
-    -- norm (v,lv) = min (fromIntegral v/lv) 1 
-
-
-class Norm a where
+class Weights a => Norm a where
     components :: a -> [Double]
     components _ = []
 
-    norm :: a -> Maybe Double -> Double
-    norm x _ = sum . components $ x
+    norm :: (a,Maybe Double) -> Double
+    norm (x,_) = sum . components $ x
 
 instance Norm Rank where
-    norm (Rank r) Nothing = (1/fromIntegral r)
+    norm (Rank r,Nothing) = (1/fromIntegral r)
 
 instance Norm Bool where
-    norm x Nothing = case x of {False -> 0.0 ; True -> 1.0} 
+    norm (x,Nothing) = case x of {False -> 0.0 ; True -> 1.0} 
 
 instance Norm Double where
-    norm v lv = min (v/(fromJust $ lv)) 1   
+    norm (v,lv) = min (v/(fromJust $ lv)) 1   
 
 instance Norm Int where
-    norm v lv = min (fromIntegral v/(fromJust lv)) 1
+    norm (v,lv) = min (fromIntegral v/(fromJust lv)) 1
 
 
 with :: a -> Double -> (a,Maybe Double)
@@ -107,7 +81,7 @@ only :: a -> (a,Maybe Double)
 only x = (x,Nothing)
 
 normAll :: Norm a => [(a,Maybe Double)] -> [Double]
-normAll = map (\(x,y) -> norm x y)
+normAll = map norm 
 
 -- =================================================================================================
 -- =================================================================================================
