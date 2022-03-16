@@ -48,7 +48,7 @@ type Val o a = Info o a [Double]
 decomposed = mapInfo components -}
 
 rankOrder :: (Set a,Set b,Norm c,Ord b) => Info a b c -> Match a b 
-rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfo norm
+rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfo(\x -> norm x Nothing)
      
 class Relate a b c | a b -> c where
     gather :: Info a b c 
@@ -91,23 +91,23 @@ instance Norm Rank where
     norm (Rank r) Nothing = (1/fromIntegral r)
 
 instance Norm Bool where
-    norm r Nothing = case x of {False -> 0.0 ; True -> 1.0} 
+    norm x Nothing = case x of {False -> 0.0 ; True -> 1.0} 
 
 instance Norm Double where
-    norm v lv = min (v/lv) 1   
+    norm v lv = min (v/(fromJust $ lv)) 1   
 
 instance Norm Int where
-    norm v lv = min (fromIntegral v/lv) 1
+    norm v lv = min (fromIntegral v/(fromJust lv)) 1
 
 
-with :: a -> b -> (a,Maybe b)
+with :: a -> Double -> (a,Maybe Double)
 with x y = (x,Just y)
 
-only :: a -> (a,Maybe b)
+only :: a -> (a,Maybe Double)
 only x = (x,Nothing)
 
-normAll :: [(a,Maybe b)] -> [Double]
-normAll = map norm 
+normAll :: Norm a => [(a,Maybe Double)] -> [Double]
+normAll = map (\(x,y) -> norm x y)
 
 -- =================================================================================================
 -- =================================================================================================

@@ -62,7 +62,7 @@ instance Relate Applicant Hospital HInfo where
 
 
 instance Norm AInfo where
-    components (Appl e x i) = normAll [e `with` 800, x `with` 10, d `with` 5]
+    components (Appl e x i) = normAll [e `with` 800, x `with` 10, i `with` 10]
 
 instance Weights Hospital where
     weights x = case x of 
@@ -77,7 +77,8 @@ instance Weights Applicant where
     weights = every [0.2,0.2,0.6] 
 
 
-
+class Weights a where
+    weights :: a -> [Double]
 
 -- instance Norm HInfo where 
 --     norm (Hptl h c d) = weight [norm h                  --> 0.2,
