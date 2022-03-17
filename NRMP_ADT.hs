@@ -10,8 +10,6 @@ data Applicant = Arthur | Sunny | Joseph | Latha | Darrius deriving (Eq,Show,Ord
 data Hospital =  Mercy | City | General deriving (Eq,Show,Ord,Enum,Bounded) 
 
 instance Set Hospital where
-    members = enumFromTo minBound maxBound
-
     capacity = every 2 
 
 data AInfo  =  Appl {examScore :: Double, experience :: Double,interviewScore :: Double}

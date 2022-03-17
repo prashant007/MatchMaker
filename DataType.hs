@@ -39,22 +39,22 @@ sortSnd = map fst . reverse . sortBy (compare `on` (fromJust.snd))
 type Val o a = Info o a [Double]
 
 
-rankOrder :: (Set a,Set b,Norm c,Ord b) => Info a b c -> Match a b 
-rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfo(\x -> norm (x,Nothing))
+rankOrder :: (Set a,Set b,Norm c,Weights a) => Info a b c -> Match a b 
+rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfo norm')
+
+
+norm' :: (c -> Double) -> Info a b Double 
+norm' = (\x -> norm (x,Nothing)
      
-class Relate a b c | a b -> c where
+class Weights a => Relate a b c | a b -> c where
     gather :: Info a b c 
 
 class Weights a where
     weights :: a -> [Double]
     weights _ = [1.0]
 
-instance Weights Int 
-instance Weights Double
-instance Weights Bool 
-instance Weights Rank 
 
-class Weights a => Norm a where
+class Norm a where
     components :: a -> [Double]
     components _ = []
 
