@@ -8,10 +8,10 @@ import DataType
 
 class (Show a,Ord a,Enum a,Bounded a) => EnumBounded a 
 
-data Applicant = Arthur | Sunny | Joseph | Latha | Darrius deriving (Eq,Show,Ord,Enum,Bounded,Set)
+data Applicant = Arthur | Sunny | Joseph | Latha | Darrius deriving (Eq,Show,Ord,Enum,Bounded,Set,Weights)
 
 
-data Hospital = City | Mercy | General deriving (Eq,Show,Ord,Enum,Bounded)
+data Hospital = City | Mercy | General deriving (Eq,Show,Ord,Enum,Bounded,Weights)
 
 
 
@@ -38,5 +38,5 @@ instance Relate Applicant Hospital Rank where
 -- *NRMPExample> oneWay :: Match Applicant Hospital
 -- {Arthur --> [City], Sunny --> [Mercy], Joseph --> [General], Latha --> [], Darrius --> []}
 
-*NRMPExample> twoWayExpl Mercy Darrius
-{General --> [Latha,Joseph], Mercy --> [Darrius], City --> [Sunny,Arthur]}
+-- *NRMPExample> twoWayExpl Mercy Darrius
+-- {General --> [Latha,Joseph], Mercy --> [Darrius], City --> [Sunny,Arthur]}

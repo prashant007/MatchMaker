@@ -49,6 +49,9 @@ onInfo f = Info .  f . unInfo
 mapInfo :: (c -> d) -> Info a b c -> Info a b d 
 mapInfo f = onInfo (M.map (mapRec f))
 
+mapInfoWithKey1 :: (a -> c -> d) -> Info a b c -> Info a b d 
+mapInfoWithKey1 f = onInfo (M.mapWithKey (\x -> mapRec (f x)))
+
 filterInfo :: (c -> Bool) -> Info a b c -> Info a b c 
 filterInfo f = onInfo (M.map (filterRec (convFun f)))
     where
