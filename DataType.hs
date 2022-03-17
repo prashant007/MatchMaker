@@ -40,11 +40,11 @@ type Val o a = Info o a [Double]
 
 
 rankOrder :: (Set a,Set b,Norm c,Weights a) => Info a b c -> Match a b 
-rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfo norm')
+rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfoWithKey1 norm'
 
 
-norm' :: (c -> Double) -> Info a b Double 
-norm' = (\x -> norm (x,Nothing)
+norm' :: (Norm c,Weights a) => (a -> c -> Double) 
+norm' x y = sum. zipWith (*) (weights x) $ (components y)
      
 class Weights a => Relate a b c | a b -> c where
     gather :: Info a b c 
