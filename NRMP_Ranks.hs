@@ -9,7 +9,10 @@ import DataType
 class (Show a,Ord a,Enum a,Bounded a) => EnumBounded a 
 
 data Applicant = Arthur | Sunny | Joseph | Latha | Darrius deriving (Eq,Show,Ord,Enum,Bounded,Set,Weights)
+
 data Hospital = City | Mercy | General deriving (Eq,Show,Ord,Enum,Bounded,Weights)
+
+
 
 instance Set Hospital where
     capacity = every 2 
