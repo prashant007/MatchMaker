@@ -32,6 +32,9 @@ class  (Bounded a,Enum a,Ord a) => Set a where
     capacity :: a -> Capacity  
     capacity = every 1
 
+
+groupings :: Set a =>  [[a]]
+groupings = [[x,y] | x <- members, y <- members, x /= y]
      
 sortSnd :: Ord c => [(b,Maybe c)] -> [b]
 sortSnd = map fst . reverse . sortBy (compare `on` (fromJust.snd))
@@ -45,14 +48,19 @@ rankOrder = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInf
 
 norm' :: (Norm c,Weights a) => (a -> c -> Double) 
 norm' x y = sum. zipWith (*) (weights x) $ (components y)
-     
-class Weights a => Relate a b c | a b -> c where
-    gather :: Info a b c 
 
 class Weights a where
     weights :: a -> [Double]
     weights _ = [1.0]
+     
+class Weights a => Relate a b c | a b -> c where
+    endowment :: [(a,b)]
+    endowment = []
 
+    gather :: Info a b c 
+
+class Relate a [b] c => Acceptable a b c where
+    acceptable :: Info a b c 
 
 class Norm a where
     components :: a -> [Double]
@@ -61,8 +69,12 @@ class Norm a where
     norm :: (a,Maybe Double) -> Double
     norm (x,_) = sum . components $ x
 
+data NDouble = ND Double 
+data NInt    = NI Int 
+
 instance Norm Rank where
-    norm (Rank r,Nothing) = (1/fromIntegral r)
+    components (Rank r) = [1/fromIntegral r]
+    norm (Rank r,Nothing) = 1/fromIntegral r
 
 instance Norm Bool where
     norm (x,Nothing) = case x of {False -> 0.0 ; True -> 1.0} 
@@ -70,9 +82,14 @@ instance Norm Bool where
 instance Norm Double where
     norm (v,lv) = min (v/(fromJust $ lv)) 1   
 
+instance Norm NDouble where
+    norm (ND v,lv) = min ((fromJust $ lv)/v) 1  
+
 instance Norm Int where
     norm (v,lv) = min (fromIntegral v/(fromJust lv)) 1
 
+instance Norm NInt where
+    norm (NI v,lv) = min (fromJust lv/fromIntegral v) 1
 
 with :: a -> Double -> (a,Maybe Double)
 with x y = (x,Just y)
@@ -95,6 +112,9 @@ choices :: (Ord a,Ord b) => [(a,[b])] -> Info a b Rank
 choices = info . map (\(x,ys) -> (x,assocRanks ys))
     where assocRanks =  zipWith (\q p -> p --> Rank q) [1..] 
 
+-- choicesM :: (Ord a,Ord b) => [(a,[[b]])] -> Info a b Rank
+-- choicesM = info . map (\(x,ys) -> (x,assocRanks ys))
+--     where assocRanks =  zipWith (\q p -> p --> Rank q) [1..] 
 
 twoWayWithCapacity :: (Relate2 a b c d,Set2 a b,Norm2 c d) => CMatch a b
 twoWayWithCapacity = CMatch $ map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
