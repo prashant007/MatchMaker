@@ -1,10 +1,10 @@
 {-# LANGUAGE MultiParamTypeClasses, DeriveAnyClass #-}
-{-# LANGUAGE ScopedTypeVariables, AllowAmbiguousTypes #-}
 
-import DataType
+import TypeClasses
 import Info 
-import MatchDatatype
-import qualified Data.Map as M 
+import MatchType
+import Combinators 
+import MatchingFunctions
 
 data Donor   = Alice | Bob | Dan | Dillon  deriving (Eq,Show,Ord,Enum,Bounded,Set) 
 data Patient = Tom   | Rob | Meg | Jon deriving (Eq,Show,Ord,Enum,Bounded,Set) 
@@ -29,7 +29,7 @@ instance Preference Patient Donor DInfo where
     gather = donorProfile `completeWith` tissueScore
 
 instance Norm DInfo where 
-    components (DInfo e x i) = [norm $ e `with` 20, norm $ x `with` 10, norm $ i `with` 10]
+    components (DInfo e x i) = [e `outOf` 20, x `outOf` 10, i `outOf` 10]
 
 instance Weights Patient where
     weights = every [0.3,0.3,0.4]

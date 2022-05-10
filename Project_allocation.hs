@@ -25,12 +25,8 @@ instance Preference Student Project Rank where
 instance Preference Lecturer Student Rank where
     gather = choices [L1 --> [S3,S4,S1,S2],L2 --> [S1,S2,S3,S4]] 
 
-instance Offers Lecturer Project where
-    collect = [L1 --> [P1,P2], L2 --> [P3,P4]]
-
-class Offers a b where
-    collect :: [(a,[b])]
-
+instance Project Lecturer Project Rank where
+    gather = choices [L1 --> [P1,P2], L2 --> [P3,P4]]
 
 
 project_SPAS :: (Preference a b c,Preference d a e,Preference d b Rank) =>  Match a b 

@@ -1,9 +1,9 @@
-    
 module Info where
 
 import qualified Data.Map as M 
 import Data.Maybe 
-import MatchDatatype
+import Data.List 
+import MatchType
 
 data Rec a b = Rec {unRec :: M.Map a (Maybe b)} 
 
@@ -42,17 +42,17 @@ filterRec f = onRec (M.filter f)
 
 data Info a b c = Info {unInfo :: M.Map a (Rec b c)} 
 
-instance (Show a,Show b,Show c) => Show (Info a b c) where
+instance Show3 a b c => Show (Info a b c) where
     show (Info x) = concat . map snd . M.toList . M.mapWithKey f $ x 
         where f = \x y -> "\t" ++ show x ++ " --> " ++ show y ++  "\n"
 
-lookupInfo :: (Ord a,Ord b) => a -> b -> Info a b c -> c 
+lookupInfo :: Ord2 a b => a -> b -> Info a b c -> c 
 lookupInfo x y =  fromJust. lookupRec y. fromJust . M.lookup x . unInfo
 
 fromInfo :: Ord b => Info a b c -> [(a,[(b,Maybe c)])] 
 fromInfo = M.toList . M.map fromRec . unInfo
 
-info :: (Ord a, Ord b) => [(a,[(b,c)])] -> Info a b c 
+info :: Ord2 a b => [(a,[(b,c)])] -> Info a b c 
 info = Info . M.fromList. map (\(x,y) -> (x, toRec . map (\(a,b) -> (a,Just b)) $ y)) 
 
 onInfo :: (M.Map a (Rec b c) -> M.Map d (Rec e f)) -> Info a b c -> Info d e f 
@@ -74,25 +74,17 @@ filterInfo f = onInfo (M.map (filterRec (convFun f)))
         convFun g (Just v) = g v
         convFun g _        = False  
 
-choices :: (Ord a,Ord b) => [(a,[b])] -> Info a b Rank
+choices :: Ord2 a b => [(a,[b])] -> Info a b Rank
 choices = info . map (\(x,ys) -> (x,assocRanks ys))
     where assocRanks =  zipWith (\q p -> p --> Rank q) [1..] 
+
+
+getRank :: Eq2 a b => a -> b -> Match a b -> Rank 
+getRank a b = Rank . (\x -> fromJust x + 1) . elemIndex b . getpreferences a 
+
+toCompRanks :: Eq2 a b => Match a b -> CompMatch a b -> CompRanks a b
+toCompRanks m = CompRanks .  map f . unCompMatch
+    where f (x,ys,zs) = (x,map (g x) ys,map (g x) zs)
+          g p q = (q,getRank p q m)
     
-completeWith :: Ord a => (b -> c -> d) -> Info a b c  -> Info a b d  
-completeWith f = onInfo (M.map (mapRecWithKey f))
-
-completeWith2 :: Ord a => (b -> c -> d -> e) -> Info a b (c,d)  -> Info a b e 
-completeWith2 f = onInfo (M.map (mapRecWithKey (\k (x,y) -> f k x y)))
-
-completeWith3 :: Ord a => (b -> c -> d -> e -> f) -> Info a b (c,d,e)  -> Info a b f 
-completeWith3 f = onInfo (M.map (mapRecWithKey (\k (x,y,z) -> f k x y z)))
-
-zipInfo :: (Ord a, Ord b) => Info a b c -> Info a b d -> Info a b (c,d)
-zipInfo i = mapInfoWithKey (\x y z -> (lookupInfo x y i,z))    
-
-zipInfo2 :: (Ord a, Ord b) => Info a b c -> Info a b d -> Info a b e -> Info a b (c,d,e)
-zipInfo2 i1 i2 = mapInfoWithKey (\x y z -> let (p,q) = lookupInfo x y (zipInfo i1 i2) in (p,q,z)) 
-
-zipInfo3 :: (Ord a, Ord b) => Info a b c -> Info a b d -> Info a b e -> Info a b f -> Info a b (c,d,e,f)
-zipInfo3 i1 i2 i3 = mapInfoWithKey (\x y z -> let (p,q,r) = lookupInfo x y (zipInfo2 i1 i2 i3) in (p,q,r,z))
 

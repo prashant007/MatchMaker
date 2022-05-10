@@ -26,22 +26,4 @@ instance Preference Student Student Rank where
                       Sam    --> [Charlie,Kelly,Peter]] 
 
 
--- *Main> sameSetMatch :: SameSetMatch Student
--- Just Charlie:
---                  Matched with [Sam]
---                  Remaining capacity: 1
--- Peter:
---                  Matched with [Kelly]
---                  Remaining capacity: 1
--- Elise:
---                  Matched with [Paul]
---                  Remaining capacity: 1
--- Paul:
---                  Matched with [Elise]
---                  Remaining capacity: 1
--- Kelly:
---                  Matched with [Peter]
---                  Remaining capacity: 1
--- Sam:
---                  Matched with [Charlie]
---                  Remaining capacity: 1
+-- > sameSetMatch :: SameSetMatch Student

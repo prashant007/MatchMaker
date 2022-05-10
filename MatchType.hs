@@ -1,8 +1,16 @@
-module MatchDatatype where 
+{-# LANGUAGE ConstraintKinds #-} 
 
+module MatchType where 
 
 import Data.Maybe 
 import Data.List 
+
+
+type Eq2 a b  = (Eq a,Eq b)
+type Ord2 a b = (Ord a,Ord b)
+type Show2 a b = (Show a,Show b)
+type Show3 a b c = (Show a,Show b,Show c)
+
 
 data Rank = Rank {unRank :: Int} deriving (Eq,Ord)
 
@@ -23,18 +31,11 @@ data CMatch a b =  CMatch {unCMatch :: [(a,[b],Capacity)]}
 data CompMatch a b = CompMatch {unCompMatch :: [(a,[b],[b])]} 
 data CompRanks a b = CompRanks {unCompRanks :: [(a,[(b,Rank)],[(b,Rank)])]} 
 
-
 assign :: [(a,b)] -> Match a b 
 assign = Match . map f 
     where f (x,y) = (x,[y],1)
 
 
-diffMatch :: (Eq a,Eq b) => Match a b -> Match a b -> CompMatch a b 
-diffMatch xs ys = CompMatch $ combine xs' ys'
-    where f = map rmvthrd . unMatch
-          xs' = f xs 
-          ys' = f ys 
-          rmvthrd = \(x,y,z) -> (x,y)
 
 combine :: (Eq a,Eq b) => [(a,[b])] -> [(a,[b])] -> [(a,[b],[b])]
 combine [] ys = map (\(x,y) -> (x,[],y)) ys 
@@ -48,20 +49,20 @@ instance (Show a,Show b) => Show (Match a b) where
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++ show y 
 
-instance (Show a,Show b) => Show (CMatch a b) where
+instance (Show2 a b) => Show (CMatch a b) where
     show = parens. concat. intersperse ", ". map f . unCMatch  
         where 
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++ show y ++ " : " ++ show z 
             
-instance (Show a,Show b,Eq b) => Show (CompMatch a b) where
+instance (Show2 a b,Eq b) => Show (CompMatch a b) where
     show = parens. concat. intersperse ", ". map f . filter g . unCompMatch  
         where 
             g (x,y,z) = y /= z
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++  show y ++ " => " ++ show z 
 
-instance (Show a,Show b,Eq b,Ord b) => Show (CompRanks a b) where
+instance (Show2 a b,Eq b,Ord b) => Show (CompRanks a b) where
     show = parens. concat. intersperse ", ". map f . unCompRanks 
         where 
             parens = \x -> "{" ++ x ++ "}"
@@ -89,7 +90,6 @@ mkPair (x,y,z) = (x,(y,z))
 
 lookupMatch :: Eq a => a -> Match a b -> ([b],Capacity)
 lookupMatch a = fromJust . lookup a . map mkPair . unMatch 
-
 
 applyMatch :: ([(a,[b],Capacity)] -> c) -> Match a b -> c 
 applyMatch f = f . unMatch

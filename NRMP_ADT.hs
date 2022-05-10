@@ -1,10 +1,10 @@
 {-# LANGUAGE MultiParamTypeClasses, DeriveAnyClass #-}
-{-# LANGUAGE ScopedTypeVariables, AllowAmbiguousTypes #-}
 
-import DataType
+import TypeClasses
 import Info 
-import MatchDatatype
-import qualified Data.Map as M 
+import MatchType
+import Combinators 
+import MatchingFunctions
 
 data Applicant = Arthur | Sunny | Joseph | Latha | Darrius deriving (Eq,Show,Ord,Enum,Bounded,Set) 
 data Hospital =  Mercy | City | General deriving (Eq,Show,Ord,Enum,Bounded) 
@@ -40,12 +40,6 @@ instance Preference Applicant Hospital HInfo where
   gather = hProfile `completeWith` desirability 
 
 
-
-outOf :: Norm a => a -> Double -> Double 
-outOf x y = norm  (x,Just y)
-
-only :: Norm a => a -> Double
-only x = norm (x,Nothing)
 
 instance Norm AInfo where
     components (Appl e x i c) = [e `outOf` 800, 

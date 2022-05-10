@@ -1,19 +1,18 @@
-{-# LANGUAGE MultiParamTypeClasses, DeriveAnyClass, StandaloneDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses, DeriveAnyClass #-}
 
 module NRMPExample where
 
-import MatchDatatype 
-import DataType 
+import TypeClasses
 import Info 
-
+import MatchType
+import Combinators 
+import MatchingFunctions
 
 class (Show a,Ord a,Enum a,Bounded a) => EnumBounded a 
 
 data Applicant = Arthur | Sunny | Joseph | Latha | Darrius | Bob deriving (Eq,Show,Ord,Enum,Bounded,Set,Weights)
 
 data Hospital = City | Mercy | General deriving (Eq,Show,Ord,Enum,Bounded,Weights)
-
-
 
 instance Set Hospital where
     capacity = every 2 
@@ -58,18 +57,4 @@ updateA = gather `modWithInfo` deltaInfo
 
 -- *NRMPExample> twoWay :: Match Hospital Applicant
 -- {General --> [Latha,Joseph], Mercy --> [], City --> [Arthur,Darrius]}
-
--- *NRMPExample> twoWay::Match Applicant Hospital
--- {Sunny --> [], Darrius --> [City], Latha --> [General], Joseph --> [General], Arthur --> [City]}
-
--- ======================================================================
-
--- *NRMPExample> twoWay::Match Applicant Hospital
--- {Sunny --> [], Darrius --> [City], Latha --> [General], Joseph --> [General], Arthur --> [City]}
-
--- *NRMPExample> oneWay :: Match Applicant Hospital
--- {Arthur --> [City], Sunny --> [Mercy], Joseph --> [General], Latha --> [], Darrius --> []}
-
--- *NRMPExample> twoWayExpl Mercy Darrius
--- {General --> [Latha,Joseph], Mercy --> [Darrius], City --> [Sunny,Arthur]}
 
