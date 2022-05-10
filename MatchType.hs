@@ -42,27 +42,27 @@ combine ((a,as):xs) ys = case lookup a ys of
     Nothing -> (a,as,[]):combine xs ys 
     Just as'-> (a,as,as'):combine xs (delete (a,as') ys)
 
-instance (Show a,Show b) => Show (Match a b) where
-    show = parens. concat. intersperse ", ". map f . unMatch  
+instance (Show a,Show b,Ord2 a b) => Show (Match a b) where
+    show = parens. concat. intersperse ", ". map f . sort . unMatch  
         where 
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++ show y 
 
-instance (Show2 a b) => Show (CMatch a b) where
-    show = parens. concat. intersperse ", ". map f . unCMatch  
+instance (Show2 a b,Ord2 a b) => Show (CMatch a b) where
+    show = parens. concat. intersperse ", ". map f . sort. unCMatch  
         where 
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++ show y ++ " : " ++ show z 
             
-instance (Show2 a b,Eq b) => Show (CompMatch a b) where
-    show = parens. concat. intersperse ", ". map f . filter g . unCompMatch  
+instance (Show2 a b,Eq b,Ord2 a b) => Show (CompMatch a b) where
+    show = parens. concat. intersperse ", ". map f . sort . filter g . unCompMatch  
         where 
             g (x,y,z) = y /= z
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++  show y ++ " => " ++ show z 
 
-instance (Show2 a b,Eq b,Ord b) => Show (CompRanks a b) where
-    show = parens. concat. intersperse ", ". map f . unCompRanks 
+instance (Show2 a b,Eq b,Ord2 a b) => Show (CompRanks a b) where
+    show = parens. concat. intersperse ", ". map f . sort . unCompRanks 
         where 
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++  showPairs y z 

@@ -24,7 +24,7 @@ class Weights a where
 class Weights a => Preference a b c | a b -> c where
     gather :: Info a b c 
 
-class Preference a b c => Exchange a b c  where 
+class Exchange a b where 
     endowment :: [(a,b)]
     endowment = []
 

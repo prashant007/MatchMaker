@@ -17,7 +17,7 @@ instance Preference Patient Donor Rank where
 
 x1 = oneWay' [P3,P4,P2,P1] :: Match Patient Donor 
 
-instance Exchange Patient Donor Rank where
+instance Exchange Patient Donor where
     endowment = [P1 --> Bob, P2 --> Dan, P3 --> Alice, P4 --> Dillon]
 
 
@@ -30,7 +30,7 @@ instance Preference Members Items Rank where
                       Surabhi  --> [Computer,Bag]]
 
 
-instance Exchange Members Items Rank where
+instance Exchange Members Items where
     endowment = [Prashant --> Computer, Anju --> Freeze, Surabhi --> Bag]
 
 

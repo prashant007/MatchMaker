@@ -32,13 +32,13 @@ mkMatch :: [(a,b,a)] -> Match a b -> Match a b
 mkMatch xs = Match . (\x -> x ++ xs'). unMatch
     where xs' = map (\(x,y,z)->(x,[y],0)) xs 
 
-oneIter ::  Match a b -> Endowment a b -> ([(a,b,a)],Match a b)
+oneIter :: Eq2 a b => Match a b -> Endowment a b -> ([(a,b,a)],Match a b)
 oneIter m es = (os,rmvMatchElems os m)
     where os = oneCycle ls xs
           xs = topChoices m es 
           ls = map (\(x,_,_) -> x) xs 
 
-topChoices :: Eq b => Match a b -> Endowment a b -> [(a,b,a)]
+topChoices :: Eq2 a b => Match a b -> Endowment a b -> [(a,b,a)]
 topChoices m e = map (f m e) (allProposers m)    
     where f m e x = let y = topchoice x m 
                     in (x,y,holds y e)
