@@ -36,12 +36,11 @@ assign = Match . map f
     where f (x,y) = (x,[y],1)
 
 
-
 combine :: (Eq a,Eq b) => [(a,[b])] -> [(a,[b])] -> [(a,[b],[b])]
 combine [] ys = map (\(x,y) -> (x,[],y)) ys 
 combine ((a,as):xs) ys = case lookup a ys of 
-                         Nothing -> (a,as,[]):combine xs ys 
-                         Just as'-> (a,as,as'):combine xs (delete (a,as') ys)
+    Nothing -> (a,as,[]):combine xs ys 
+    Just as'-> (a,as,as'):combine xs (delete (a,as') ys)
 
 instance (Show a,Show b) => Show (Match a b) where
     show = parens. concat. intersperse ", ". map f . unMatch  
@@ -98,11 +97,20 @@ onMatch :: ([(a,[b],Capacity)] -> [(a,[b],Capacity)]) ->
            Match a b -> Match a b 
 onMatch f = Match . f . unMatch 
 
+
+
+
 foldMatch :: ((a,[b],Capacity) -> c -> c) -> c -> Match a b -> c 
 foldMatch f acc = foldr f acc . unMatch
 
 modMatch :: (Eq a,Eq b) => ((a,[b],Capacity) -> (a,[b],Capacity)) -> Match a b -> Match a b 
 modMatch f = Match . map f . unMatch 
+
+delMatch :: Eq a => a -> Match a b -> Match a b 
+delMatch v = Match . filter (\(x,_,_) -> x /= v) . unMatch 
+
+delMatchAll :: Eq a => [a] -> Match a b -> Match a b 
+delMatchAll vs = Match . filter (\(x,_,_) -> not $ elem x vs) . unMatch 
 
 getpreferences :: Eq a => a -> Match a b -> [b]
 getpreferences x = fst . lookupMatch x
@@ -121,6 +129,9 @@ changepreferences f a = modMatch (\xc@(x,y,z) -> if x == a then (x,f y,z) else x
 
 delpreference :: (Eq a,Eq b) =>  b -> Match a b -> Match a b
 delpreference b = modMatch (\xc@(x,y,z) -> (x,delete b y,z))
+
+delpreferenceAll :: (Eq a,Eq b) =>  [b] -> Match a b -> Match a b
+delpreferenceAll bs = modMatch (\xc@(x,y,z) -> (x, y \\ bs,z))
 
 iterChangeperefrences :: (Eq a,Eq b) => ([b] -> [b]) -> [a] -> Match a b -> Match a b 
 iterChangeperefrences _ [] m = m 

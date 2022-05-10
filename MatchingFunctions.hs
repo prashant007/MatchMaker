@@ -55,6 +55,9 @@ oneWay' xs = rmvCapacity $ oneWayWithCapacity' xs
 oneWay :: (Preference a b c,Set2 a b,Norm c) => Match a b
 oneWay = rmvCapacity oneWayWithCapacity 
 
-trade :: (Preference a b c,Set2 a b,Norm c) => Match a b
-trade = undefined 
+-- tradewithCapacity :: (Preference a b c, Set2 a b,Norm c) => CMatch a b 
+-- tradeWithCapacity = CMatch $ ttc $ ranks gather
+
+trade :: (Preference a b c,Set2 a b,Norm c,Exchange a b c) => Match a b
+trade = ttc (ranks gather) endowment []  
 
