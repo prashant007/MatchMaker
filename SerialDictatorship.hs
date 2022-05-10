@@ -8,8 +8,11 @@ removeJust :: Maybe a -> a
 removeJust (Just x) = x
 
 serialAssignment :: (Eq a,Eq b) => [a] ->[(a,Maybe b)] ->  PrefTable a b -> Match a b 
-serialAssignment [] a _ = Match $ map (\(x,y) -> if y == Nothing then (x,[],0) 
-                                                                 else (x,[removeJust y],0)) (reverse a)
+serialAssignment [] a _ = let f (x,y) = if y == Nothing
+                                          then (x,[],0) 
+                                          else (x,[removeJust y],0)
+                          in Match $ map f (reverse a)
+
 serialAssignment (x:xs) as m = let p = (getpreferences x m)
                                    m' = delpreference (p!!0) m
                                    a' = if p == [] then (x,Nothing) else (x,Just $ p!!0)

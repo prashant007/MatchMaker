@@ -4,12 +4,43 @@ module MatchDatatype where
 import Data.Maybe 
 import Data.List 
 
+data Rank = Rank {unRank :: Int} deriving (Eq,Ord)
+
+instance Show Rank where
+    show (Rank r) = show r 
+
+rank = Just . Rank
+
+(-->) :: a -> b -> (a,b)
+(-->) x y = (x,y)
+
 type Capacity = Int 
 
 data Match a b = Match {unMatch:: [(a,[b],Capacity)]} 
 type SameSetMatch a = Maybe (Match a a) 
 
-data CMatch a b =  CMatch {unCMatch::  [(a,[b],Capacity)]} 
+data CMatch a b =  CMatch {unCMatch :: [(a,[b],Capacity)]} 
+data CompMatch a b = CompMatch {unCompMatch :: [(a,[b],[b])]} 
+data CompRanks a b = CompRanks {unCompRanks :: [(a,[(b,Rank)],[(b,Rank)])]} 
+
+
+assign :: [(a,b)] -> Match a b 
+assign = Match . map f 
+    where f (x,y) = (x,[y],1)
+
+
+diffMatch :: (Eq a,Eq b) => Match a b -> Match a b -> CompMatch a b 
+diffMatch xs ys = CompMatch $ combine xs' ys'
+    where f = map rmvthrd . unMatch
+          xs' = f xs 
+          ys' = f ys 
+          rmvthrd = \(x,y,z) -> (x,y)
+
+combine :: (Eq a,Eq b) => [(a,[b])] -> [(a,[b])] -> [(a,[b],[b])]
+combine [] ys = map (\(x,y) -> (x,[],y)) ys 
+combine ((a,as):xs) ys = case lookup a ys of 
+                         Nothing -> (a,as,[]):combine xs ys 
+                         Just as'-> (a,as,as'):combine xs (delete (a,as') ys)
 
 instance (Show a,Show b) => Show (Match a b) where
     show = parens. concat. intersperse ", ". map f . unMatch  
@@ -17,13 +48,40 @@ instance (Show a,Show b) => Show (Match a b) where
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++ show y 
 
-
 instance (Show a,Show b) => Show (CMatch a b) where
     show = parens. concat. intersperse ", ". map f . unCMatch  
         where 
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++ show y ++ " : " ++ show z 
             
+instance (Show a,Show b,Eq b) => Show (CompMatch a b) where
+    show = parens. concat. intersperse ", ". map f . filter g . unCompMatch  
+        where 
+            g (x,y,z) = y /= z
+            parens = \x -> "{" ++ x ++ "}"
+            f (x,y,z) = show x ++ " --> " ++  show y ++ " => " ++ show z 
+
+instance (Show a,Show b,Eq b,Ord b) => Show (CompRanks a b) where
+    show = parens. concat. intersperse ", ". map f . unCompRanks 
+        where 
+            parens = \x -> "{" ++ x ++ "}"
+            f (x,y,z) = show x ++ " --> " ++  showPairs y z 
+            
+            showPair :: Show b =>  (b,Rank) -> String 
+            showPair (b,r) = show b ++ " : " ++ show r 
+
+            showPairList :: Show b => [(b,Rank)] -> String 
+            showPairList [x] = showPair x 
+            showPairList xs = "[" ++ concatMap showPair xs ++ "]"
+             
+
+            showPairs :: (Show b, Ord b) => [(b,Rank)] -> [(b,Rank)] -> String  
+            showPairs xs ys 
+                | and ls = f " < " xs ys 
+                | not.or $ ls = f " > " xs ys 
+                | otherwise  = f " ? " xs ys 
+                where ls = zipWith (\x y -> not $ x < y ) xs ys 
+                      f x y z = showPairList y ++ x ++ showPairList z
 
 type StabMatch a = Match a a 
 
@@ -39,7 +97,6 @@ applyMatch f = f . unMatch
 onMatch :: ([(a,[b],Capacity)] -> [(a,[b],Capacity)]) -> 
            Match a b -> Match a b 
 onMatch f = Match . f . unMatch 
-
 
 foldMatch :: ((a,[b],Capacity) -> c -> c) -> c -> Match a b -> c 
 foldMatch f acc = foldr f acc . unMatch
@@ -75,7 +132,5 @@ topchoice x = head . getpreferences x
 allProposers :: Eq a => Match a b -> [a]
 allProposers = foldMatch (\(x,_,_) acc -> x:acc) []
 
--- allProposers = foldMatch (map (fst.mkPair))
 
--- allProposees :: Eq a => Match a b -> [a]
--- allProposees = foldMatch (map (fst.snd.mkPair))
+

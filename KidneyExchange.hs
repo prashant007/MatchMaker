@@ -25,7 +25,7 @@ tissueScore = info [Tom --> [Bob   --> 8, Dan --> 9, Dillon --> 1],
                     Jon --> [Alice --> 4, Bob --> 7, Dan    --> 10]]
 
              
-instance Relate Patient Donor DInfo where
+instance Preference Patient Donor DInfo where
     gather = donorProfile `completeWith` tissueScore
 
 instance Norm DInfo where 

@@ -157,55 +157,55 @@ irvings m = case phase1WithReduction m of
  Irving's Example for phase1: Page 580    
 -}
 
-m1 = Match [ ("1",g "46253",1), ("2",g "63514",1), ("3",g "45162",1),
-             ("4",g "26513",1), ("5",g "42361",1), ("6",g "51423",1)]  
-    where
-       g :: String -> [String]
-       g = map (\x -> x:[])
+-- m1 = Match [ ("1",g "46253",1), ("2",g "63514",1), ("3",g "45162",1),
+--              ("4",g "26513",1), ("5",g "42361",1), ("6",g "51423",1)]  
+--     where
+--        g :: String -> [String]
+--        g = map (\x -> x:[])
 
 
-Just m1_val = phase1WithReduction m1
-m1_ans = irvings m1_val
+-- Just m1_val = phase1WithReduction m1
+-- m1_ans = irvings m1_val
 
 
-video = Match [ ("A",g "BDFCE",1), ("B",g "DEFAC",1), ("C",g "DEFAB",1),
-                ("D",g "FCAEB",1), ("E",g "FCDBA",1), ("F",g "ABDCE",1)]  
-        where
-           g :: String -> [String]
-           g = map (\x -> x:[])
+-- video = Match [ ("A",g "BDFCE",1), ("B",g "DEFAC",1), ("C",g "DEFAB",1),
+--                 ("D",g "FCAEB",1), ("E",g "FCDBA",1), ("F",g "ABDCE",1)]  
+--         where
+--            g :: String -> [String]
+--            g = map (\x -> x:[])
 
-Just vid_val = phase1WithReduction video
-vid_ans = irvings vid_val
+-- Just vid_val = phase1WithReduction video
+-- vid_ans = irvings vid_val
 
-vid_expl = Match [("C",g "DEF",1),("D",g "FCE",1), ("E",g "FCD",1), ("F",g "DCE",1)]  
-        where
-           g :: String -> [String]
-           g = map (\x -> x:[])
+-- vid_expl = Match [("C",g "DEF",1),("D",g "FCE",1), ("E",g "FCD",1), ("F",g "DCE",1)]  
+--         where
+--            g :: String -> [String]
+--            g = map (\x -> x:[])
 
-Just vid_expl_val = phase1WithReduction vid_expl
-vid_expl_ans = irvings vid_expl_val
+-- Just vid_expl_val = phase1WithReduction vid_expl
+-- vid_expl_ans = irvings vid_expl_val
 
-m2 = Match [ ("Charlie", words "Peter Paul Sam Kelly Elise",1), 
-             ("Peter", words "Kelly Elise Sam Paul Charlie",1),
-             ("Elise", words "Peter Sam Kelly Charlie Paul",1),
-             ("Paul", words "Elise Charlie Sam Peter Kelly",1),
-             ("Kelly", words "Peter Charlie Sam Elise Paul",1),
-             ("Sam", words "Charlie Paul Kelly Elise Peter",1)
-           ]  
-
-
-Just m2_val = phase1WithReduction m2
-m2_ans = irvings m2_val
+-- m2 = Match [ ("Charlie", words "Peter Paul Sam Kelly Elise",1), 
+--              ("Peter", words "Kelly Elise Sam Paul Charlie",1),
+--              ("Elise", words "Peter Sam Kelly Charlie Paul",1),
+--              ("Paul", words "Elise Charlie Sam Peter Kelly",1),
+--              ("Kelly", words "Peter Charlie Sam Elise Paul",1),
+--              ("Sam", words "Charlie Paul Kelly Elise Peter",1)
+--            ]  
 
 
-m3 = Match [ ("1",g "26435",1), ("2",g "35164",1), ("3",g "16254",1),
-             ("4",g "52361",1), ("5",g "61342",1), ("6",g "42513",1)]  
-    where
-       g :: String -> [String]
-       g = map (\x -> x:[])
+-- Just m2_val = phase1WithReduction m2
+-- m2_ans = irvings m2_val
 
-Just m3_val = phase1WithReduction m3
-m3_ans = irvings m3_val
+
+-- m3 = Match [ ("1",g "26435",1), ("2",g "35164",1), ("3",g "16254",1),
+--              ("4",g "52361",1), ("5",g "61342",1), ("6",g "42513",1)]  
+--     where
+--        g :: String -> [String]
+--        g = map (\x -> x:[])
+
+-- Just m3_val = phase1WithReduction m3
+-- m3_ans = irvings m3_val
 
 -- *Main> gencycle "2" m1_val ([],[])
 -- (["2","3","4"],["5","2","5"])
