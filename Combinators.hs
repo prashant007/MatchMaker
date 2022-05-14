@@ -15,7 +15,7 @@ import MatchType
 import TypeClasses 
 
 ranks :: (Set a,Set b,Norm c,Weights a) => Info a b c -> Match a b 
-ranks = Match . map (\(x,y) -> (x,sortSnd y,capacity x)) . fromInfo . mapInfoWithKey1 norm'
+ranks = Match . map (\(x,y) -> (x,sortSnd y,quota x)) . fromInfo . mapInfoWithKey1 norm'
     where norm' :: (Norm c,Weights a) => (a -> c -> Double) 
           norm' x y = sum. zipWith (*) (weights x) $ (components y)
 

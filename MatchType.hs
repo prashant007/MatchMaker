@@ -35,7 +35,6 @@ assign :: [(a,b)] -> Match a b
 assign = Match . map f 
     where f (x,y) = (x,[y],1)
 
-
 combine :: (Eq a,Eq b) => [(a,[b])] -> [(a,[b])] -> [(a,[b],[b])]
 combine [] ys = map (\(x,y) -> (x,[],y)) ys 
 combine ((a,as):xs) ys = case lookup a ys of 
@@ -62,8 +61,9 @@ instance (Show2 a b,Eq b,Ord2 a b) => Show (CompMatch a b) where
             f (x,y,z) = show x ++ " --> " ++  show y ++ " => " ++ show z 
 
 instance (Show2 a b,Eq b,Ord2 a b) => Show (CompRanks a b) where
-    show = parens. concat. intersperse ", ". map f . sort . unCompRanks 
+    show = parens. concat. intersperse ", ". map f . sort . filter g . unCompRanks 
         where 
+            g (x,y,z) = y /= z
             parens = \x -> "{" ++ x ++ "}"
             f (x,y,z) = show x ++ " --> " ++  showPairs y z 
             
@@ -87,6 +87,9 @@ type StabMatch a = Match a a
 
 mkPair (x,y,z) = (x,(y,z))
 
+fromMatch' :: Match a b -> [(a,b)]
+fromMatch' = map(\(x,y,z)->(x,head y)) .unMatch
+
 lookupMatch :: Eq a => a -> Match a b -> ([b],Capacity)
 lookupMatch a = fromJust . lookup a . map mkPair . unMatch 
 
@@ -96,8 +99,6 @@ applyMatch f = f . unMatch
 onMatch :: ([(a,[b],Capacity)] -> [(a,[b],Capacity)]) -> 
            Match a b -> Match a b 
 onMatch f = Match . f . unMatch 
-
-
 
 
 foldMatch :: ((a,[b],Capacity) -> c -> c) -> c -> Match a b -> c 

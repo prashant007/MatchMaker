@@ -6,15 +6,15 @@ import MatchType
 import Info 
 import Data.Maybe 
 
-every :: b -> a -> b 
-every c _ = c 
+forall :: b -> a -> b 
+forall c _ = c 
 
 class  (Bounded a,Enum a,Ord a) => Set a where
     members :: [a]
     members = enumFromTo minBound maxBound
 
-    capacity :: a -> Capacity  
-    capacity = every 1
+    quota :: a -> Capacity  
+    quota = forall 1
 
 
 class Weights a where
@@ -25,8 +25,7 @@ class Weights a => Preference a b c | a b -> c where
     gather :: Info a b c 
 
 class Exchange a b where 
-    endowment :: [(a,b)]
-    endowment = []
+    endowment :: Match a b
 
 class Norm a where
     components :: a -> [Double]

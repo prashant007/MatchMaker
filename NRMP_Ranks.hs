@@ -15,7 +15,7 @@ data Applicant = Arthur | Sunny | Joseph | Latha | Darrius | Bob deriving (Eq,Sh
 data Hospital = City | Mercy | General deriving (Eq,Show,Ord,Enum,Bounded,Weights)
 
 instance Set Hospital where
-    capacity = every 2 
+    quota = forall 2 
 
 instance Preference Hospital Applicant Rank where
     gather = choices [Mercy   --> [Darrius,Joseph], 

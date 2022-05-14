@@ -11,10 +11,10 @@ data Lecturer = L1 | L2 deriving (Eq,Show,Ord,Enum,Bounded,Weights)
 data Project  = P1 | P2 | P3 | P4 deriving (Eq,Show,Ord,Enum,Bounded) 
 
 instance Set Lecturer where
-    capacity = every 2 
+    quota = forall 2 
 
 instance Set Project where
-    capacity x
+    quota x
         | elem x [P1,P3] = 2
         | otherwise = 1
  
