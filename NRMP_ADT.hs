@@ -57,7 +57,7 @@ instance Norm HInfo where
     components (Hptl h c d) = [only h, c `outOf` 10, d `outOf` 5]
 
 instance Weights Applicant where
-    weights = every [0.2,0.2,0.6] 
+    weights = forall [0.2,0.2,0.6] 
 
 
 aProfile :: Applicant -> Double -> Bool -> AInfo
