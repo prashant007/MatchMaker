@@ -15,7 +15,7 @@ import MatchType
 import TypeClasses 
 
 ranks :: (Set a,Set b,Norm c,Weights a) => Info a b c -> Match a b 
-ranks = Match . map (\(x,y) -> (x,sortSnd y,quota x)) . fromInfo . mapInfoWithKey1 norm'
+ranks = Match . map (\(x,y) -> (x,sortSnd y,Just $ quota x)) . fromInfo . mapInfoWithKey1 norm'
     where norm' :: (Norm c,Weights a) => (a -> c -> Double) 
           norm' x y = sum. zipWith (*) (weights x) $ (components y)
 
@@ -92,3 +92,8 @@ diffMatch xs ys = CompMatch $ combine xs' ys'
           xs' = f xs 
           ys' = f ys 
           rmvthrd = \(x,y,z) -> (x,y)
+
+toCompRanks :: Eq2 a b => Match a b -> CompMatch a b -> CompRanks a b
+toCompRanks m = CompRanks .  map f . unCompMatch
+    where f (x,ys,zs) = (x,map (g x) ys,map (g x) zs)
+          g p q = (q,getRank p q m)

@@ -1,8 +1,12 @@
 {-# LANGUAGE MultiParamTypeClasses,DeriveAnyClass #-}
 
-import DataType 
+import TypeClasses
 import Info 
-import MatchDatatype
+import MatchType
+import Combinators 
+import MatchingFunctions
+import OneWayMatching
+
 
 
 -- https://www.youtube.com/watch?v=9Lo7TFAkohE&ab_channel=OscarRobertson

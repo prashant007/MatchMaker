@@ -14,43 +14,49 @@ import TypeClasses
 import Combinators
 
 
-twoWayWithCapacity :: (Preference2 a b c d,Set2 a b,Norm2 c d) => CMatch a b
-twoWayWithCapacity = CMatch $ map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
+twoWayWithCapacity :: (Preference2 a b c d,Set2 a b,Norm2 c d) => Match a b
+twoWayWithCapacity = Match $ map (\(p,(_,r,_,t)) -> (p,r,Just t)) ls 
     where
       ls = galeShapley (f x) (f y) 
       (x,y) = (ranks gather,ranks gather)
-      f = map (\(a,b,c) -> (a,(b,[],c,c))) . unMatch 
+      f = map (\(a,b,Just c) -> (a,(b,[],c,c))) . unMatch 
 
-twoWayWithCapacity':: (Preference2 a b c d,Set2 a b,Norm2 c d) =>  Info a b c -> Info b a d -> CMatch a b
-twoWayWithCapacity' xs ys = CMatch $ map (\(p,(_,r,_,t)) -> (p,r,t)) ls 
+twoWayWithPref :: (Preference2 a b c d,Set2 a b,Norm2 c d) =>
+                  Info a b c -> Info b a d -> Match a b
+twoWayWithPref xs ys = rmvCapacity Match $ map (\(p,(_,r,_,t)) -> (p,r,Just t)) ls 
     where
       ls = galeShapley (f x) (f y) 
       (x,y) = (ranks xs,ranks ys)
-      f = map (\(a,b,c) -> (a,(b,[],c,c))) . unMatch
+      f = map (\(a,b,Just c) -> (a,(b,[],c,c))) . unMatch
 
-twoWay' :: (Preference2 a b c d,Set2 a b,Norm2 c d) => Info a b c -> Info b a d -> Match a b
-twoWay' xs ys = rmvCapacity $ twoWayWithCapacity' xs ys 
+-- twoWayWithPref :: (Preference2 a b c d,Set2 a b,Norm2 c d) => 
+--                   Info a b c -> Info b a d -> Match a b
+-- twoWayWithPref xs ys = rmvCapacity $ twoWayWithCapacity' xs ys 
 
 twoWay :: (Preference2 a b c d,Set2 a b,Norm2 c d) => Match a b
 twoWay = rmvCapacity twoWayWithCapacity
 
-twoWayDiff :: (Preference2 a b c d,Set2 a b,Norm2 c d) => Info a b c -> Info b a d -> CompMatch a b 
-twoWayDiff xs ys = diffMatch twoWay (twoWay' xs ys)
+twoWayDiff :: (Preference2 a b c d,Set2 a b,Norm2 c d) =>
+              Info a b c -> Info b a d -> CompMatch a b 
+twoWayDiff xs ys = diffMatch twoWay (twoWayWithPref xs ys)
 
-rmvCapacity :: CMatch a b -> Match a b 
-rmvCapacity (CMatch ls) = Match $ map (\(p,r,c) -> (p,r,0)) ls
+rmvCapacity :: Match a b -> Match a b 
+rmvCapacity (Match ls) = Match $ map (\(p,r,c) -> (p,r,Nothing)) ls
 
 sameSet :: (Preference a a b,Set a,Norm b) => SameSetMatch a
-sameSet = irvings $ ranks gather
+sameSet = fmap rmvCapacity $ irvings $ ranks gather
 
-oneWayWithCapacity :: (Preference a b c, Set2 a b,Norm c) => CMatch a b 
-oneWayWithCapacity = CMatch $ unMatch $ serial members [] $ ranks gather
+oneWayGeneral :: (Weights a,Norm c,Set2 a b) => [a] -> Info a b c -> Match a b
+oneWayGeneral xs ys = serial xs [] (ranks ys)
 
-oneWayWithCapacity' :: (Preference a b c, Set2 a b,Norm c) => [a] -> CMatch a b 
-oneWayWithCapacity' xs = CMatch $ unMatch $ serial xs [] $ ranks gather
+oneWayWithCapacity :: (Preference a b c,Set2 a b,Norm c) => Match a b 
+oneWayWithCapacity = oneWayGeneral members gather 
 
-oneWay' :: (Preference a b c,Set2 a b,Norm c) => [a] -> Match a b
-oneWay' xs = rmvCapacity $ oneWayWithCapacity' xs 
+oneWayWithOrder :: (Preference a b c,Set2 a b,Norm c) => [a] -> Match a b
+oneWayWithOrder xs = rmvCapacity $ oneWayGeneral xs gather 
+
+oneWayWithPref :: (Preference a b c, Set2 a b,Norm c) => Info a b c -> Match a b 
+oneWayWithPref = oneWayGeneral members 
 
 oneWay :: (Preference a b c,Set2 a b,Norm c) => Match a b
 oneWay = rmvCapacity oneWayWithCapacity 

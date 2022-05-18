@@ -17,6 +17,7 @@ instance Preference Patient Donor Rank where
 
 x1 = oneWay' [P3,P4,P2,P1] :: Match Patient Donor 
 
+
 instance Exchange Patient Donor where
     endowment = assign [P1 --> Bob, P2 --> Dillon,
                         P3 --> Alice, P4 --> Dan]

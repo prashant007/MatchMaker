@@ -78,13 +78,8 @@ choices :: Ord2 a b => [(a,[b])] -> Info a b Rank
 choices = info . map (\(x,ys) -> (x,assocRanks ys))
     where assocRanks =  zipWith (\q p -> p --> Rank q) [1..] 
 
-
 getRank :: Eq2 a b => a -> b -> Match a b -> Rank 
 getRank a b = Rank . (\x -> fromJust x + 1) . elemIndex b . getpreferences a 
 
-toCompRanks :: Eq2 a b => Match a b -> CompMatch a b -> CompRanks a b
-toCompRanks m = CompRanks .  map f . unCompMatch
-    where f (x,ys,zs) = (x,map (g x) ys,map (g x) zs)
-          g p q = (q,getRank p q m)
     
 
