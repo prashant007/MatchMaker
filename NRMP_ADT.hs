@@ -25,7 +25,7 @@ hProfile :: Hospital -> DScore -> HInfo
 hProfile h = case h of 
                     Mercy  -> Hptl (Rank 2) 9 
                     City   -> Hptl (Rank 1) 10
-                    General-> Hptl (Rank 2) 8
+                    General-> Hptl (Rank 3) 8
 
 
 desirability :: Info Applicant Hospital DScore
@@ -37,7 +37,7 @@ desirability =  info [Arthur --> [City --> 3],
 
 
 instance Preference Applicant Hospital HInfo where
-  gather = hProfile `completeWith` desirability 
+  gather = hProfile `completedWith` desirability 
 
 
 
@@ -70,7 +70,7 @@ aProfile a = case a of
 
 interview :: Info Hospital Applicant Double
 interview = info [Mercy   --> [Joseph --> 8,Darrius --> 9],
-                  City    --> [Arthur --> 10,Sunny --> 9,Joseph --> 8,Latha --> 6,Darrius--> 10], 
+                  City    --> [Arthur --> 10,Sunny --> 9,Joseph --> 4,Latha --> 6,Darrius--> 10], 
                   General --> [Arthur --> 9,Joseph --> 8,Latha --> 5,Darrius --> 10]]
 
 school ::  Info Hospital Applicant Bool 
@@ -82,18 +82,18 @@ school = info [Mercy   --> [Joseph --> False,Darrius--> True],
 
 
 instance Preference Hospital Applicant AInfo where
-    gather = aProfile `completeWith2` (interview `zipInfo` school)
+    gather = aProfile `completedWith2` (interview `zipInfo` school)
 
 
 
-interview' = interview `updateWithRow` (Mercy --> [Sunny --> 8, Arthur --> 8])
-                       `updateWithRow` (City  --> [Sunny --> 9])
+-- interview' = interview `updateWithRow` (Mercy --> [Sunny --> 8, Arthur --> 8])
+--                        `updateWithRow` (City  --> [Sunny --> 9])
 
 deltaInterview = info [Mercy --> [Sunny --> 8, Arthur --> 8],
                        City  --> [Sunny --> 9]]  
 
-school' = school `updateWithRow` (Mercy --> [Sunny --> True, Arthur --> False])
-                 `updateWithRow` (City  --> [Sunny --> False])
+-- school' = school `updateWithRow` (Mercy --> [Sunny --> True, Arthur --> False])
+--                  `updateWithRow` (City  --> [Sunny --> False])
 
 
 deltaSchool = info [Mercy --> [Sunny --> True, Arthur --> False],
@@ -104,5 +104,6 @@ interview1 = interview `updateWithInfo` deltaInterview
 school1 = school `updateWithInfo` deltaSchool
 
 
-updatedHosp = aProfile `completeWith2` (interview' `zipInfo` school')
-updatedHosp1 = aProfile `completeWith2` (interview1 `zipInfo` school1)
+-- updatedHosp = aProfile `completeWith2` (interview' `zipInfo` school')
+updatedHosp1 = aProfile `completedWith2` (interview1 `zipInfo` school1)
+

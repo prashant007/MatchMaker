@@ -23,7 +23,7 @@ twoWayWithCapacity = Match $ map (\(p,(_,r,_,t)) -> (p,r,Just t)) ls
 
 twoWayWithPref :: (Preference2 a b c d,Set2 a b,Norm2 c d) =>
                   Info a b c -> Info b a d -> Match a b
-twoWayWithPref xs ys = rmvCapacity Match $ map (\(p,(_,r,_,t)) -> (p,r,Just t)) ls 
+twoWayWithPref xs ys = rmvCapacity $ Match $ map (\(p,(_,r,_,t)) -> (p,r,Just t)) ls 
     where
       ls = galeShapley (f x) (f y) 
       (x,y) = (ranks xs,ranks ys)

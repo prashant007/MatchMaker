@@ -25,14 +25,14 @@ ranks = Match . map (\(x,y) -> (x,sortSnd y,Just $ quota x)) . fromInfo . mapInf
 -- ==================================================================
 -- Combinators for abstract encoding of preferences
 
-completeWith :: Ord a => (b -> c -> d) -> Info a b c  -> Info a b d  
-completeWith f = onInfo (M.map (mapRecWithKey f))
+completedWith :: Ord a => (b -> c -> d) -> Info a b c  -> Info a b d  
+completedWith f = onInfo (M.map (mapRecWithKey f))
 
-completeWith2 :: Ord a => (b -> c -> d -> e) -> Info a b (c,d)  -> Info a b e 
-completeWith2 f = onInfo (M.map (mapRecWithKey (\k (x,y) -> f k x y)))
+completedWith2 :: Ord a => (b -> c -> d -> e) -> Info a b (c,d)  -> Info a b e 
+completedWith2 f = onInfo (M.map (mapRecWithKey (\k (x,y) -> f k x y)))
 
-completeWith3 :: Ord a => (b -> c -> d -> e -> f) -> Info a b (c,d,e)  -> Info a b f 
-completeWith3 f = onInfo (M.map (mapRecWithKey (\k (x,y,z) -> f k x y z)))
+completedWith3 :: Ord a => (b -> c -> d -> e -> f) -> Info a b (c,d,e)  -> Info a b f 
+completedWith3 f = onInfo (M.map (mapRecWithKey (\k (x,y,z) -> f k x y z)))
 
 zipInfo :: Ord2 a b => Info a b c -> Info a b d -> Info a b (c,d)
 zipInfo i = mapInfoWithKey (\x y z -> (lookupInfo x y i,z))    
