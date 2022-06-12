@@ -23,16 +23,15 @@ tissueScore = info [Tom --> [Bob   --> 8, Dan --> 9, Dillon --> 1],
                     Rob --> [Alice --> 2, Dan --> 9, Dillon --> 6], 
                     Meg --> [Alice --> 8, Bob --> 6, Dillon --> 7],
                     Jon --> [Alice --> 4, Bob --> 7, Dan    --> 10]]
-
              
 instance Preference Patient Donor DInfo where
-    gather = donorProfile `completeWith` tissueScore
+    gather = donorProfile `completedWith` tissueScore
 
 instance Norm DInfo where 
     components (DInfo e x i) = [e `outOf` 20, x `outOf` 10, i `outOf` 10]
 
 instance Weights Patient where
-    weights = every [0.3,0.3,0.4]
+    weights = forall [0.3,0.3,0.4]
 
 
 

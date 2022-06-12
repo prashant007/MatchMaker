@@ -16,7 +16,6 @@ class  (Bounded a,Enum a,Ord a) => Set a where
     quota :: a -> Capacity  
     quota = forall 1
 
-
 class Weights a where
     weights :: a -> [Double]
     weights _ = [1.0]

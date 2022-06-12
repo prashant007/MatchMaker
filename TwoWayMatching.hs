@@ -29,7 +29,6 @@ galeShapley x y = gsHelper x y x
               True  -> gsHelper xs ys xs'
               False -> let (nys,nxs') = g x (ys,xs') in gsHelper xs nys nxs'
 
-
 g :: (Eq b, Eq a) => (a,(Options b, Matches b,Capacity,RCapacity)) -> 
                      (MRank b a,MRank a b) -> (MRank b a,MRank a b)
 g (xv,(xo,xm,xc,xr)) yxl@(yl,xl) 
@@ -51,7 +50,6 @@ g (xv,(xo,xm,xc,xr)) yxl@(yl,xl)
               ys@(yo,ym,yc,yr) = (fromJust.lookup yv) yl  
               y  = (yv,ys)
               xo'= tail xo 
-
 
 replace :: Eq a => a -> (Options a,Matches a) -> Matches a -> Maybe (a,Matches a) 
 replace _ (_,[]) ym' = Nothing 

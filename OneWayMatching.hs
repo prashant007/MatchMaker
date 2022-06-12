@@ -61,7 +61,6 @@ oneCycle (x:xs) ls
             | otherwise = mkCycle o t ls (v:acc)
             where t@(p,q,r) = find z ls
                   
-
 rmvMatchElems :: Eq2 a b => [(a,b,a)] -> Match a b -> Match a b 
 rmvMatchElems xs = delMatchAll as . delpreferenceAll bs 
     where as = map (\(x,y,z) -> x) xs 

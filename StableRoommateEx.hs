@@ -30,4 +30,4 @@ instance Preference Student Student Rank where
                       Sam    --> [Charlie,Kelly,Peter]] 
 
 
--- > sameSetMatch :: SameSetMatch Student
+

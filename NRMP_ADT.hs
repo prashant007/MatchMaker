@@ -27,7 +27,6 @@ hProfile h = case h of
                     City   -> Hptl (Rank 1) 10
                     General-> Hptl (Rank 3) 8
 
-
 desirability :: Info Applicant Hospital DScore
 desirability =  info [Arthur --> [City --> 3],
                       Sunny  --> [Mercy --> 4,City --> 3],
@@ -35,11 +34,8 @@ desirability =  info [Arthur --> [City --> 3],
                       Latha  --> [Mercy --> 5,City --> 1,General --> 1],
                       Darrius--> [Mercy --> 5,City --> 5,General --> 4]]    
 
-
 instance Preference Applicant Hospital HInfo where
   gather = hProfile `completedWith` desirability 
-
-
 
 instance Norm AInfo where
     components (Appl e x i c) = [e `outOf` 800, 
@@ -59,7 +55,6 @@ instance Norm HInfo where
 instance Weights Applicant where
     weights = forall [0.2,0.2,0.6] 
 
-
 aProfile :: Applicant -> Double -> Bool -> AInfo
 aProfile a = case a of 
                 Arthur -> Appl 700 2 
@@ -78,32 +73,29 @@ school = info [Mercy   --> [Joseph --> False,Darrius--> True],
                City    --> [Arthur --> True, Sunny  --> False,Joseph --> False,Latha --> False,Darrius--> False], 
                General --> [Arthur --> False,Joseph --> True,Latha --> False,Darrius --> False]]
 
-
-
-
 instance Preference Hospital Applicant AInfo where
     gather = aProfile `completedWith2` (interview `zipInfo` school)
-
-
-
--- interview' = interview `updateWithRow` (Mercy --> [Sunny --> 8, Arthur --> 8])
---                        `updateWithRow` (City  --> [Sunny --> 9])
 
 deltaInterview = info [Mercy --> [Sunny --> 8, Arthur --> 8],
                        City  --> [Sunny --> 9]]  
 
--- school' = school `updateWithRow` (Mercy --> [Sunny --> True, Arthur --> False])
---                  `updateWithRow` (City  --> [Sunny --> False])
-
-
 deltaSchool = info [Mercy --> [Sunny --> True, Arthur --> False],
                     City  --> [Sunny --> False]]  
-
 
 interview1 = interview `updateWithInfo` deltaInterview
 school1 = school `updateWithInfo` deltaSchool
 
+updatedHosp = aProfile `completedWith2` (interview1 `zipInfo` school1)
 
--- updatedHosp = aProfile `completeWith2` (interview' `zipInfo` school')
-updatedHosp1 = aProfile `completedWith2` (interview1 `zipInfo` school1)
+-- ============== Getting the matchings ==========================
 
+-- *Main> twoWay :: Match Applicant Hospital
+-- {Arthur --> [City], Sunny --> [], Joseph --> [General], 
+--  Latha  --> [General], Darrius --> [City]}
+
+-- *Main> twoWayWithCapacity :: Match Hospital Applicant
+-- {Mercy --> [] : 2, City --> [Arthur,Darrius] : 0, 
+--  General --> [Latha,Joseph] : 0}
+
+-- *Main> twoWayDiff updatedHosp gather
+-- {Mercy --> [] => [Sunny]}
