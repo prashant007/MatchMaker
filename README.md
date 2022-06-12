@@ -41,8 +41,7 @@ instance Preference Applicant Hospital Rank where
                       Latha   --> [Mercy,City,General],
                       Darrius --> [City,Mercy,General]]  
 ```
-
-===================================================
+## Example Files
 
 The various examples shown in the paper are present in the following files:
 
