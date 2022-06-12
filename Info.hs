@@ -5,6 +5,7 @@ import Data.Maybe
 import Data.List 
 import MatchType
 
+-- Data types for recording perferences
 data Rec a b = Rec {unRec :: M.Map a (Maybe b)} 
 
 instance (Show a,Show b) => Show (Rec a b) where

@@ -109,7 +109,6 @@ foldMatch :: ((a,[b],Capacity) -> c -> c) -> c -> Match a b -> c
 foldMatch f acc = foldr g acc . unMatch
     where g (x,y,z) = f (x,y,fromJust z)
 
-
 modMatch :: (Eq a,Eq b) => ((a,[b],Capacity) -> (a,[b],Capacity)) ->
                            Match a b -> Match a b 
 modMatch f = Match . map (putMaybe . f . rmvMaybe). unMatch 
@@ -151,7 +150,6 @@ topchoice x = head . getpreferences x
 
 allProposers :: Eq a => Match a b -> [a]
 allProposers = foldMatch (\(x,_,_) acc -> x:acc) []
-
 
 instance Num a => Num (Maybe a) where
   (+) = liftA2 (+)

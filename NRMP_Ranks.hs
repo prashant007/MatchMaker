@@ -29,17 +29,6 @@ instance Preference Applicant Hospital Rank where
                       Latha   --> [Mercy,City,General],
                       Darrius --> [City,Mercy,General]]  
 
-
-
-
--- updatedHosp = gather `modWithRanks` (Mercy --> [Darrius,Joseph,Sunny,Arthur,Latha])
--- updatedApp  = gather `modWithRanks` (Sunny --> [City,Mercy,General])
---                   `modWithRanks` (Latha --> [City,Mercy,General])
--- deltaInfo = choices [Sunny  --> [City,Mercy,General], 
---                      Latha --> [City,Mercy,General]]
--- updateA = gather `modWithInfo` deltaInfo
-
-
 updatedApp  = gather `modWithRanks` (Bob --> [Mercy,General,City])
 updatedHosp = gather `modWithRanks` (Mercy  --> [Darrius,Joseph,Sunny])
                      `modWithRanks` (General--> [Darrius,Arthur,Joseph,Latha])
@@ -49,12 +38,9 @@ deltaInfo = choices [Mercy  --> [Darrius,Bob,Joseph],
                      General--> [Bob,Darrius,Arthur,Joseph,Latha]]
 updateA = gather `modWithInfo` deltaInfo
 
-
-
--- newInfoMen = gather `modWithRanks` (M1 --> [W4,W1,W3])
--- newInfoWomen = gather `modWithRanks` (W4 --> [M2,M1]) 
-
-
+-- ============== matching results =======================================
 -- *NRMPExample> twoWay :: Match Hospital Applicant
 -- {General --> [Latha,Joseph], Mercy --> [], City --> [Arthur,Darrius]}
 
+-- *NRMPExample> twoWayWithPref updatedHosp updatedApp
+-- {City --> [Arthur,Darrius], Mercy --> [Sunny], General --> [Latha,Joseph]}

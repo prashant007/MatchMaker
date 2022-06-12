@@ -76,14 +76,8 @@ school = info [Mercy   --> [Joseph --> False,Darrius--> True],
 instance Preference Hospital Applicant AInfo where
     gather = aProfile `completedWith2` (interview `zipInfo` school)
 
--- interview' = interview `updateWithRow` (Mercy --> [Sunny --> 8, Arthur --> 8])
---                        `updateWithRow` (City  --> [Sunny --> 9])
-
 deltaInterview = info [Mercy --> [Sunny --> 8, Arthur --> 8],
                        City  --> [Sunny --> 9]]  
-
--- school' = school `updateWithRow` (Mercy --> [Sunny --> True, Arthur --> False])
---                  `updateWithRow` (City  --> [Sunny --> False])
 
 deltaSchool = info [Mercy --> [Sunny --> True, Arthur --> False],
                     City  --> [Sunny --> False]]  
@@ -91,6 +85,17 @@ deltaSchool = info [Mercy --> [Sunny --> True, Arthur --> False],
 interview1 = interview `updateWithInfo` deltaInterview
 school1 = school `updateWithInfo` deltaSchool
 
--- updatedHosp = aProfile `completeWith2` (interview' `zipInfo` school')
-updatedHosp1 = aProfile `completedWith2` (interview1 `zipInfo` school1)
+updatedHosp = aProfile `completedWith2` (interview1 `zipInfo` school1)
 
+-- ============== Getting the matchings ==========================
+
+-- *Main> twoWay :: Match Applicant Hospital
+-- {Arthur --> [City], Sunny --> [], Joseph --> [General], 
+--  Latha  --> [General], Darrius --> [City]}
+
+-- *Main> twoWayWithCapacity :: Match Hospital Applicant
+-- {Mercy --> [] : 2, City --> [Arthur,Darrius] : 0, 
+--  General --> [Latha,Joseph] : 0}
+
+-- *Main> twoWayDiff updatedHosp gather
+-- {Mercy --> [] => [Sunny]}

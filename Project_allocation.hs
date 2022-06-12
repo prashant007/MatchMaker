@@ -28,7 +28,6 @@ instance Preference Lecturer Student Rank where
 instance Preference Lecturer Project Rank where
     gather = choices [L1 --> [P1,P2], L2 --> [P3,P4]]
 
-
 -- project_SPAS :: (Preference a b c,Preference d a e,Preference d b Rank) =>  Match a b 
 -- project_SPAS = undefined 
 

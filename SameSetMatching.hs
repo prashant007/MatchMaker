@@ -41,7 +41,6 @@ offerStatus x y oTable m =
                                  else BetterOfferAccept $ 
                                         (y,x): (oTable \\ [(y,oldProposer)])
 
-
 termination :: Eq a => PrefTable a -> OfferTable a -> (Bool,Bool)
 termination m o = (rejectedbyAll m,oneproposalAll m o)
 
