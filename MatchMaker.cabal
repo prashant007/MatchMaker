@@ -11,7 +11,7 @@ homepage:            https://github.com/prashant007/MatchMaker
 -- bug-reports:
 license:             BSD3
 license-file:        LICENSE
-author:              Prashant Kumar
+author:              Prashant Kumar and Martin Erig
 maintainer:          kumarpra@oregonstate.edu
 -- copyright:
 category:            Language
