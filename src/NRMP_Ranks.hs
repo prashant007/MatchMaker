@@ -1,6 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses, DeriveAnyClass #-}
 
-module NRMPExample where
+module NRMP_Ranks where
 
 import TypeClasses
 import Info 
