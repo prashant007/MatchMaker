@@ -1,5 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses, DeriveAnyClass #-}
 
+module KidneyExchange_Ranks where
 import TypeClasses
 import Info 
 import MatchType

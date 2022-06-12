@@ -1,5 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses,DeriveAnyClass #-}
 
+module StableRoommateEx where
 import TypeClasses
 import Info 
 import MatchType

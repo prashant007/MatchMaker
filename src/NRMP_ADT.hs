@@ -1,5 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses, DeriveAnyClass #-}
 
+module NRMP_ADT where
+
 import TypeClasses
 import Info 
 import MatchType

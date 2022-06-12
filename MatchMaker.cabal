@@ -3,11 +3,11 @@ cabal-version:       >=1.10
 -- init'.  For further documentation, see
 -- http://haskell.org/cabal/users-guide/
 
-name:                Matching-DSL
+name:                MatchMaker
 version:             0.1.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/prashant007/MatchMaker
+homepage:            
 -- bug-reports:
 license:             BSD3
 license-file:        LICENSE

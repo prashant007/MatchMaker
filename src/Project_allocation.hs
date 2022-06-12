@@ -1,5 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses, DeriveAnyClass, FlexibleContexts #-}
 
+module Project_allocation where
+
 import TypeClasses
 import Info 
 import MatchType
