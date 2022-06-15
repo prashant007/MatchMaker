@@ -6,13 +6,10 @@ import Data.Maybe
 import Data.List 
 import Control.Applicative
 
-
-
 type Eq2 a b  = (Eq a,Eq b)
 type Ord2 a b = (Ord a,Ord b)
 type Show2 a b = (Show a,Show b)
 type Show3 a b c = (Show a,Show b,Show c)
-
 
 data Rank = Rank {unRank :: Int} deriving (Eq,Ord)
 
@@ -20,7 +17,7 @@ instance Show Rank where
     show (Rank r) = show r 
 
 rank = Just . Rank
-
+                                
 (-->) :: a -> b -> (a,b)
 (-->) x y = (x,y)
 
@@ -31,12 +28,6 @@ type SameSetMatch a = Maybe (Match a a)
 
 data CompMatch a b = CompMatch {unCompMatch :: [(a,[b],[b])]} 
 data CompRanks a b = CompRanks {unCompRanks :: [(a,[(b,Rank)],[(b,Rank)])]} 
-
--- toMatch :: Match a b -> Match a b 
--- toMatch = Match . map (\(x,y,z) -> (x,y,Just z)). unMatch
-
--- toCMatch :: Match a b -> CMatch a b 
--- toCMatch = CMatch . map (\(x,y,Just z) -> (x,y,z)). unMatch
 
 assign :: [(a,b)] -> Match a b 
 assign = Match . map f 
